@@ -1,8 +1,10 @@
 ﻿using Microsoft.Azure.WebJobs.Description;
 using Microsoft.Azure.WebJobs.Host.Config;
 using Microsoft.Extensions.Configuration;
+using MongoDbTrigger.Bindings;
+using MongoDbTrigger.Triggers;
 
-namespace MongoDbTrigger.Trigger
+namespace MongoDbTrigger
 {
     [Extension("MongoDb")]
     internal sealed class MongoDbExtensionsProvider : IExtensionConfigProvider

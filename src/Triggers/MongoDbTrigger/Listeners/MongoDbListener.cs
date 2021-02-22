@@ -3,11 +3,10 @@ using Microsoft.Azure.WebJobs.Host.Listeners;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDbTrigger
+namespace MongoDbTrigger.Listeners
 {
     public class MongoDbListener : IListener
     {
@@ -19,7 +18,6 @@ namespace MongoDbTrigger
         private readonly string _databaseName;
         private readonly string _collectionName;
 
-        //private Task _watchTask;
         private bool _disposedValue;
 
         public MongoDbListener(

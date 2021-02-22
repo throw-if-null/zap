@@ -1,5 +1,4 @@
 ﻿using Microsoft.Azure.WebJobs;
-using MongoDbTrigger.Trigger;
 using System;
 
 namespace MongoDbTrigger

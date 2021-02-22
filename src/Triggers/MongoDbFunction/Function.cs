@@ -1,7 +1,7 @@
 ﻿using Microsoft.Azure.WebJobs;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDbTrigger;
+using MongoDbTrigger.Triggers;
 
 namespace MongoDbFunction
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Azure.WebJobs.Description;
 using System;
 
-namespace MongoDbTrigger
+namespace MongoDbTrigger.Triggers
 {
     [Binding]
     [AttributeUsage(AttributeTargets.Parameter)]

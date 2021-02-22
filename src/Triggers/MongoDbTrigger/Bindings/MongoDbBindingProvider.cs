@@ -1,23 +1,26 @@
 ﻿using Microsoft.Azure.WebJobs.Host.Triggers;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
+using MongoDbTrigger.Triggers;
 using System;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace MongoDbTrigger
+namespace MongoDbTrigger.Bindings
 {
-    public class MongoDbTriggerBindingProvider : ITriggerBindingProvider
+    internal sealed class MongoDbBindingProvider : ITriggerBindingProvider
     {
         private readonly IConfiguration _configuration;
 
-        public MongoDbTriggerBindingProvider(IConfiguration configuration)
+        public MongoDbBindingProvider(IConfiguration configuration)
         {
             _configuration = configuration;
         }
 
-        public Task<ITriggerBinding> TryCreateAsync(TriggerBindingProviderContext context)
+        public Task<ITriggerBinding> TryCreateAsync(TriggerBindingProviderContext context) => Task.FromResult(TryCreate(context));
+
+        public ITriggerBinding TryCreate(TriggerBindingProviderContext context)
         {
             var parameter = context?.Parameter ?? throw new ArgumentNullException(nameof(context));
             if (parameter.ParameterType.GetGenericTypeDefinition() != typeof(ChangeStreamDocument<>))
@@ -28,21 +31,14 @@ namespace MongoDbTrigger
                 return null;
 
             var triggerConnectionString = ResolveAttributeConnectionString(attr);
-
             var genericType = parameter.ParameterType.GetGenericArguments().First();
 
-            return Task.FromResult<ITriggerBinding>(new MongoDbTriggerBinding(
-                genericType,
-                attr.Database,
-                attr.Collection,
-                attr.ConnectionString));
+            return new MongoDbTriggerBinding(genericType, attr.Database, attr.Collection, triggerConnectionString);
         }
 
         private string ResolveAttributeConnectionString(MongoDbTriggerAttribute triggerAttribute) =>
             triggerAttribute.ConnectionString.Contains("%")
-                ? ResolveConnectionString(
-                    triggerAttribute.ConnectionString.Replace("%", ""),
-                    nameof(MongoDbTriggerAttribute.ConnectionString))
+                ? ResolveConnectionString(triggerAttribute.ConnectionString.Replace("%", ""), nameof(MongoDbTriggerAttribute.ConnectionString))
                 : triggerAttribute.ConnectionString;
 
         private string ResolveConnectionString(string unresolvedConnectionString, string propertyName)

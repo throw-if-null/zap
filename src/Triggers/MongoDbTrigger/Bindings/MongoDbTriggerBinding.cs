@@ -3,11 +3,12 @@ using Microsoft.Azure.WebJobs.Host.Listeners;
 using Microsoft.Azure.WebJobs.Host.Protocols;
 using Microsoft.Azure.WebJobs.Host.Triggers;
 using MongoDB.Driver;
+using MongoDbTrigger.Listeners;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MongoDbTrigger
+namespace MongoDbTrigger.Bindings
 {
     public class MongoDbTriggerBinding : ITriggerBinding
     {
