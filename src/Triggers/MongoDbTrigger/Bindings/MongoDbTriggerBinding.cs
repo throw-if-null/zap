@@ -14,7 +14,7 @@ namespace MongoDbTrigger.Bindings
     {
         private readonly Type _genericType;
         private readonly string _database;
-        private readonly string _collection;
+        private readonly string[] _collections;
         private readonly string _connectionString;
 
         public Type TriggerValueType => typeof(ChangeStreamDocument<>).MakeGenericType(_genericType);
@@ -24,12 +24,12 @@ namespace MongoDbTrigger.Bindings
         public MongoDbTriggerBinding(
             Type genericType,
             string database,
-            string collection,
+            string[] collections,
             string connectionString)
         {
             _genericType = genericType;
             _database = database;
-            _collection = collection;
+            _collections = collections;
             _connectionString = connectionString;
         }
 
@@ -49,7 +49,7 @@ namespace MongoDbTrigger.Bindings
                 new MongoDbListener(
                     _genericType,
                     _database,
-                    _collection,
+                    _collections,
                     _connectionString,
                     context.Executor));
         }
@@ -59,7 +59,7 @@ namespace MongoDbTrigger.Bindings
             return new MongoDbTriggerParameterDescriptor
             {
                 DatabaseName = _database,
-                Collectionname = _collection
+                Collections = string.Join(',', _collections)
             };
         }
 

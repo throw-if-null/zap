@@ -33,7 +33,7 @@ namespace MongoDbTrigger.Bindings
             var triggerConnectionString = ResolveAttributeConnectionString(attr);
             var genericType = parameter.ParameterType.GetGenericArguments().First();
 
-            return new MongoDbTriggerBinding(genericType, attr.Database, attr.Collection, triggerConnectionString);
+            return new MongoDbTriggerBinding(genericType, attr.Database, attr.Collections, triggerConnectionString);
         }
 
         private string ResolveAttributeConnectionString(MongoDbTriggerAttribute triggerAttribute) =>

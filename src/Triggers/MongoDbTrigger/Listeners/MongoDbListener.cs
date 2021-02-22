@@ -3,6 +3,7 @@ using Microsoft.Azure.WebJobs.Host.Listeners;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,21 +16,21 @@ namespace MongoDbTrigger.Listeners
         private readonly Type _genericType;
         private readonly ITriggeredFunctionExecutor _executor;
         private readonly string _connectionString;
-        private readonly string _databaseName;
-        private readonly string _collectionName;
+        private readonly string _database;
+        private readonly string[] _collections;
 
         private bool _disposedValue;
 
         public MongoDbListener(
             Type genericType,
-            string databaseName,
-            string collectionName,
+            string database,
+            string[] collections,
             string connectionString,
             ITriggeredFunctionExecutor executor)
         {
             _genericType = genericType;
-            _databaseName = databaseName;
-            _collectionName = collectionName;
+            _database = database;
+            _collections = collections;
             _connectionString = connectionString;
             _executor = executor;
         }
@@ -44,17 +45,27 @@ namespace MongoDbTrigger.Listeners
 
         private async Task WatchAsync(MongoUrl url, CancellationToken cancellationToken)
         {
-            var db = new MongoClient(_connectionString).GetDatabase(_databaseName);
+            var db = new MongoClient(_connectionString).GetDatabase(_database);
 
+            var childCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-            var method = typeof(IMongoDatabase).GetMethod(nameof(IMongoDatabase.GetCollection));
+            var tasks = new List<Task>(_collections.Length);
 
-            dynamic collection =
-                method
-                    .MakeGenericMethod(_genericType)
-                    .Invoke(db, new object[] { _collectionName, new MongoCollectionSettings() });
+            foreach (var collectionName in _collections)
+            {
+                var method = typeof(IMongoDatabase).GetMethod(nameof(IMongoDatabase.GetCollection));
 
-            await Watch(collection, cancellationToken);
+                dynamic collection =
+                    method
+                        .MakeGenericMethod(_genericType)
+                        .Invoke(db, new object[] { collectionName, new MongoCollectionSettings() });
+
+                var task = Watch(collection, childCancellation.Token);
+
+                tasks.Add(task);
+            }
+
+            await Task.WhenAll(tasks);
         }
 
         private async Task Watch<T>(IMongoCollection<T> collection, CancellationToken cancellationToken)
