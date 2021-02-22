@@ -1,0 +1,70 @@
+version: '2.4'
+
+# Templates:
+x-base: &base-service-template
+  init: true
+  networks:
+    local:
+
+services:
+
+  portainer:
+    <<: *base-service-template
+    image: portainer/portainer:latest
+    container_name: portainer
+    command: -p :80
+    ports:
+      - "9000:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+
+  azurite:
+    <<: *base-service-template
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: azurite
+    command: azurite --blobHost 0.0.0.0 --queueHost 0.0.0.0 --loose
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+
+  mongo1:
+    <<: *base-service-template
+    image: mongo:4.2
+    container_name: mongo1
+    command: ["--replSet", "my-replica-set", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/mongo-1:/data/db
+    ports:
+      - 30001:27017
+    healthcheck:
+      test: test $$(echo "rs.initiate({_id:'my-replica-set',members:[{_id:0,host:\"mongo1:30001\"},{_id:1,host:\"mongo2:30002\"},{_id:2,host:\"mongo3:30003\"}]}).ok || rs.status().ok" | mongo --port 30001 --quiet) -eq 1
+      interval: 10s
+      start_period: 30s
+
+  mongo2:
+    <<: *base-service-template
+    image: mongo:4.2
+    container_name: mongo2
+    command: ["--replSet", "my-replica-set", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/mongo-2:/data/db
+    ports:
+      - 30002:27017
+
+  mongo3:
+    <<: *base-service-template
+    image: mongo:4.2
+    container_name: mongo3
+    command: ["--replSet", "my-replica-set", "--bind_ip_all", "--port", "27017"]
+    volumes:
+      - ./data/mongo-3:/data/db
+    ports:
+      - 30003:27017
+
+networks:
+  local:
+    name: local
+
+volumes:
+  portainer_data:
