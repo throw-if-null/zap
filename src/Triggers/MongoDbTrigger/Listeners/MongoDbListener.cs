@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MongoDbTrigger.Listeners
 {
-    public class MongoDbListener : IListener
+    internal class MongoDbListener : IListener
     {
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 

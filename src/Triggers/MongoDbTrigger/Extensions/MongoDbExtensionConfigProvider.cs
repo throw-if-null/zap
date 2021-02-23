@@ -4,13 +4,12 @@ using Microsoft.Extensions.Configuration;
 using MongoDbTrigger.Bindings;
 using MongoDbTrigger.Triggers;
 
-namespace MongoDbTrigger
+namespace MongoDbTrigger.Extensions
 {
     [Extension("MongoDb")]
     internal sealed class MongoDbExtensionsProvider : IExtensionConfigProvider
     {
         private readonly IConfiguration _configuration;
-
 
         public MongoDbExtensionsProvider(IConfiguration configuration) => _configuration = configuration;
 

@@ -23,33 +23,37 @@ namespace MongoDbTrigger.Bindings
         public ITriggerBinding TryCreate(TriggerBindingProviderContext context)
         {
             var parameter = context?.Parameter ?? throw new ArgumentNullException(nameof(context));
+
             if (parameter.ParameterType.GetGenericTypeDefinition() != typeof(ChangeStreamDocument<>))
                 return null;
 
-            var attr = parameter.GetCustomAttribute<MongoDbTriggerAttribute>(inherit: false);
-            if (attr == null)
+            var attribute = parameter.GetCustomAttribute<MongoDbTriggerAttribute>(inherit: false);
+
+            if (attribute == null)
                 return null;
 
-            var triggerConnectionString = ResolveAttributeConnectionString(attr);
+            var triggerConnectionString = ResolveAttributeConnectionString(attribute);
             var genericType = parameter.ParameterType.GetGenericArguments().First();
 
-            return new MongoDbTriggerBinding(genericType, attr.Database, attr.Collections, triggerConnectionString);
+            return new MongoDbTriggerBinding(genericType, attribute.Database, attribute.Collections, triggerConnectionString);
         }
 
         private string ResolveAttributeConnectionString(MongoDbTriggerAttribute triggerAttribute) =>
             triggerAttribute.ConnectionString.Contains("%")
-                ? ResolveConnectionString(triggerAttribute.ConnectionString.Replace("%", ""), nameof(MongoDbTriggerAttribute.ConnectionString))
+                ? ResolveConnectionString(
+                    triggerAttribute.ConnectionString.Replace("%", ""),
+                    nameof(MongoDbTriggerAttribute.ConnectionString))
                 : triggerAttribute.ConnectionString;
 
         private string ResolveConnectionString(string unresolvedConnectionString, string propertyName)
         {
-            if (string.IsNullOrEmpty(unresolvedConnectionString)) return null;
+            if (string.IsNullOrEmpty(unresolvedConnectionString))
+                return null;
 
             var resolvedString = _configuration.GetConnectionStringOrSetting(unresolvedConnectionString);
 
             if (string.IsNullOrEmpty(resolvedString))
-                throw new InvalidOperationException(
-                    $"Unable to resolve app setting for property '{nameof(MongoDbTriggerAttribute)}.{propertyName}'. Make sure the app setting exists and has a valid value.");
+                throw new InvalidOperationException($"Unable to resolve app setting for property '{nameof(MongoDbTriggerAttribute)}.{propertyName}'.");
 
             return resolvedString;
         }

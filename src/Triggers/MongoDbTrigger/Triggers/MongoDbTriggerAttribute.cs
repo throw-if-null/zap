@@ -5,7 +5,7 @@ namespace MongoDbTrigger.Triggers
 {
     [Binding]
     [AttributeUsage(AttributeTargets.Parameter)]
-    public class MongoDbTriggerAttribute : Attribute
+    public sealed class MongoDbTriggerAttribute : Attribute
     {
 
         public string Database { get; }

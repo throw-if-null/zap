@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.WebJobs;
+using MongoDbTrigger.Extensions;
 using System;
 
 namespace MongoDbTrigger
@@ -14,6 +15,7 @@ namespace MongoDbTrigger
             _ = builder ?? throw new ArgumentNullException(nameof(builder));
 
             builder.AddExtension<MongoDbExtensionsProvider>();
+
             return builder;
         }
     }

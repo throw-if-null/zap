@@ -1,16 +1,20 @@
 ﻿using Microsoft.Azure.WebJobs;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using MongoDbTrigger.Triggers;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace MongoDbFunction
 {
-    public class Handler
+    // https://github.com/Azure/azure-functions-core-tools/issues/2294 - blocked upgrade to .net 5
+    public static class Function
     {
-        public void Handle(ChangeStreamDocument<dynamic> document)
+        [FunctionName("MongoDbFunction")]
+        public static void Run(
+            [MongoDbTrigger("test", new []{"items", "things"}, ConnectionString = "%Connection")]
+            ChangeStreamDocument<dynamic> document)
         {
             var json = JsonConvert.SerializeObject(document.FullDocument);
 
@@ -24,37 +28,28 @@ namespace MongoDbFunction
             }
         }
     }
-    // https://github.com/Azure/azure-functions-core-tools/issues/2294 - blocked upgrade to .net 5
-    public static class Function
-    {
-        [FunctionName("MongoDbFunction")]
-        public static void Run(
-            [MongoDbTrigger("test", new []{"items", "things"}, ConnectionString = "%Connection")]
-            ChangeStreamDocument<dynamic> csd)
-        {
-            new Handler().Handle(csd);
-        }
-    }
-
 
     public class BaseObject
     {
-        public string _id { get; set; }
+        [JsonProperty("_id")]
+        public ObjectId Id { get; set; }
     }
 
     public class Item : BaseObject
     {
-        public string test { get; set; }
+        public string Test { get; set; }
 
-        public int number { get; set; }
+        public int Number { get; set; }
 
-        public bool yes { get; set; }
+        public bool Yes { get; set; }
+
+        public IEnumerable<string> Children { get; set; }
     }
 
     public class Thing : BaseObject
     {
-        public int number { get; set; }
+        public int Number { get; set; }
 
-        public int number2 { get; set; }
+        public int Number2 { get; set; }
     }
 }

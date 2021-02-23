@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MongoDbTrigger.Bindings
 {
-    public class MongoDbTriggerBinding : ITriggerBinding
+    internal class MongoDbTriggerBinding : ITriggerBinding
     {
         private readonly Type _genericType;
         private readonly string _database;
@@ -37,7 +37,7 @@ namespace MongoDbTrigger.Bindings
         {
             ITriggerData triggerData =
                 new TriggerData(
-                    new ValueProvider(value, _genericType),
+                    new ValueProvider(value, TriggerValueType),
                     new Dictionary<string, object>());
 
             return Task.FromResult(triggerData);
@@ -59,7 +59,9 @@ namespace MongoDbTrigger.Bindings
             return new MongoDbTriggerParameterDescriptor
             {
                 DatabaseName = _database,
-                Collections = string.Join(',', _collections)
+                Collections = string.Join(',', _collections),
+                Type = _genericType.Name,
+                Name = "MongoDbTrigger"
             };
         }
 
@@ -70,7 +72,7 @@ namespace MongoDbTrigger.Bindings
             public ValueProvider(object value, Type triggerValueType)
             {
                 _value = value;
-                Type = typeof(ChangeStreamDocument<>).MakeGenericType(triggerValueType);
+                Type = triggerValueType;
             }
 
             public Type Type { get; }
