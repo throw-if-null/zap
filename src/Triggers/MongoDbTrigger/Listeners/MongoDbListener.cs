@@ -45,7 +45,7 @@ namespace MongoDbTrigger.Listeners
 
         private async Task WatchAsync(MongoUrl url, CancellationToken cancellationToken)
         {
-            var db = new MongoClient(_connectionString).GetDatabase(_database);
+            var database = new MongoClient(_connectionString).GetDatabase(_database);
 
             var childCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
@@ -53,12 +53,7 @@ namespace MongoDbTrigger.Listeners
 
             foreach (var collectionName in _collections)
             {
-                var method = typeof(IMongoDatabase).GetMethod(nameof(IMongoDatabase.GetCollection));
-
-                dynamic collection =
-                    method
-                        .MakeGenericMethod(_genericType)
-                        .Invoke(db, new object[] { collectionName, new MongoCollectionSettings() });
+                var collection = database.GetCollection<dynamic>(collectionName);
 
                 var task = Watch(collection, childCancellation.Token);
 
@@ -68,17 +63,17 @@ namespace MongoDbTrigger.Listeners
             await Task.WhenAll(tasks);
         }
 
-        private async Task Watch<T>(IMongoCollection<T> collection, CancellationToken cancellationToken)
+        private async Task Watch(IMongoCollection<dynamic> collection, CancellationToken cancellationToken)
         {
             var cursor = await collection.WatchAsync(cancellationToken: cancellationToken);
             await cursor.ForEachAsync(document => WatchChange(document, cancellationToken), cancellationToken);
         }
 
-        private async Task WatchChange(BsonDocumentBackedClass arg, CancellationToken cancellationToken)
+        private async Task WatchChange(BsonDocumentBackedClass document, CancellationToken cancellationToken)
         {
             var input = new TriggeredFunctionData
             {
-                TriggerValue = arg
+                TriggerValue = document
             };
 
             try
