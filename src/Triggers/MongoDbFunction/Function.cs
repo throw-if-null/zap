@@ -1,5 +1,4 @@
 ﻿using Microsoft.Azure.WebJobs;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDbTrigger.Triggers;
 using Newtonsoft.Json;
@@ -32,7 +31,7 @@ namespace MongoDbFunction
     public class BaseObject
     {
         [JsonProperty("_id")]
-        public ObjectId Id { get; set; }
+        public string Id { get; set; }
     }
 
     public class Item : BaseObject

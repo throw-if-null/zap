@@ -6,28 +6,26 @@ using MongoDB.Driver;
 using MongoDbTrigger.Listeners;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace MongoDbTrigger.Bindings
 {
     internal class MongoDbTriggerBinding : ITriggerBinding
     {
-        private readonly Type _genericType;
         private readonly string _database;
         private readonly string[] _collections;
         private readonly string _connectionString;
 
-        public Type TriggerValueType => typeof(ChangeStreamDocument<>).MakeGenericType(_genericType);
+        public Type TriggerValueType => typeof(ChangeStreamDocument<dynamic>);
 
         public IReadOnlyDictionary<string, Type> BindingDataContract { get; } = new Dictionary<string, Type>();
 
         public MongoDbTriggerBinding(
-            Type genericType,
             string database,
             string[] collections,
             string connectionString)
         {
-            _genericType = genericType;
             _database = database;
             _collections = collections;
             _connectionString = connectionString;
@@ -47,7 +45,7 @@ namespace MongoDbTrigger.Bindings
         {
             return Task.FromResult<IListener>(
                 new MongoDbListener(
-                    _genericType,
+                    TriggerValueType.GetGenericArguments().First(),
                     _database,
                     _collections,
                     _connectionString,
@@ -60,7 +58,6 @@ namespace MongoDbTrigger.Bindings
             {
                 DatabaseName = _database,
                 Collections = string.Join(',', _collections),
-                Type = _genericType.Name,
                 Name = "MongoDbTrigger"
             };
         }
