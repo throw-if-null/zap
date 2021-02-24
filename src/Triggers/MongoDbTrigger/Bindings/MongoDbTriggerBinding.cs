@@ -45,7 +45,6 @@ namespace MongoDbTrigger.Bindings
         {
             return Task.FromResult<IListener>(
                 new MongoDbListener(
-                    TriggerValueType.GetGenericArguments().First(),
                     _database,
                     _collections,
                     _connectionString,

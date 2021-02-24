@@ -13,7 +13,6 @@ namespace MongoDbTrigger.Listeners
     {
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
-        private readonly Type _genericType;
         private readonly ITriggeredFunctionExecutor _executor;
         private readonly string _connectionString;
         private readonly string _database;
@@ -22,13 +21,11 @@ namespace MongoDbTrigger.Listeners
         private bool _disposedValue;
 
         public MongoDbListener(
-            Type genericType,
             string database,
             string[] collections,
             string connectionString,
             ITriggeredFunctionExecutor executor)
         {
-            _genericType = genericType;
             _database = database;
             _collections = collections;
             _connectionString = connectionString;
@@ -40,10 +37,9 @@ namespace MongoDbTrigger.Listeners
             _cancellationTokenSource.Cancel();
         }
 
-        public Task StartAsync(CancellationToken cancellationToken) =>
-            WatchAsync(MongoUrl.Create(_connectionString), _cancellationTokenSource.Token);
+        public Task StartAsync(CancellationToken cancellationToken) => WatchAsync(_cancellationTokenSource.Token);
 
-        private async Task WatchAsync(MongoUrl url, CancellationToken cancellationToken)
+        private async Task WatchAsync(CancellationToken cancellationToken)
         {
             var database = new MongoClient(_connectionString).GetDatabase(_database);
 
@@ -63,13 +59,13 @@ namespace MongoDbTrigger.Listeners
             await Task.WhenAll(tasks);
         }
 
-        private async Task Watch(IMongoCollection<dynamic> collection, CancellationToken cancellationToken)
+        private async Task Watch(IMongoCollection<dynamic> collection, CancellationToken cancellation)
         {
-            var cursor = await collection.WatchAsync(cancellationToken: cancellationToken);
-            await cursor.ForEachAsync(document => WatchChange(document, cancellationToken), cancellationToken);
+            var cursor = await collection.WatchAsync(null, cancellation);
+            await cursor.ForEachAsync(document => WatchChange(document, cancellation), cancellation);
         }
 
-        private async Task WatchChange(BsonDocumentBackedClass document, CancellationToken cancellationToken)
+        private async Task WatchChange(BsonDocumentBackedClass document, CancellationToken cancellation)
         {
             var input = new TriggeredFunctionData
             {
@@ -78,7 +74,7 @@ namespace MongoDbTrigger.Listeners
 
             try
             {
-                await _executor.TryExecuteAsync(input, cancellationToken);
+                await _executor.TryExecuteAsync(input, cancellation);
             }
             catch
             {
