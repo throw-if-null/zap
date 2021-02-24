@@ -11,9 +11,7 @@ namespace MongoDbFunction
     public static class Function
     {
         [FunctionName("MongoDbFunction")]
-        public static void Run(
-            [MongoDbTrigger("test", new []{"items", "things"}, ConnectionString = "%Connection")]
-            ChangeStreamDocument<dynamic> document)
+        public static void Run([MongoDbTrigger] ChangeStreamDocument<dynamic> document)
         {
             var json = JsonConvert.SerializeObject(document.FullDocument);
 

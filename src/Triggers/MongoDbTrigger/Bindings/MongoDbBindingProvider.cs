@@ -32,29 +32,46 @@ namespace MongoDbTrigger.Bindings
             if (attribute == null)
                 return null;
 
-            var triggerConnectionString = ResolveAttributeConnectionString(attribute);
+            var database = ResolveDatabase();
+            var collections = ResolveCollections();
+            var connectionString = ResolveConnectionString();
 
-            return new MongoDbTriggerBinding(attribute.Database, attribute.Collections, triggerConnectionString);
+            return new MongoDbTriggerBinding(database, collections, connectionString);
         }
 
-        private string ResolveAttributeConnectionString(MongoDbTriggerAttribute triggerAttribute) =>
-            triggerAttribute.ConnectionString.Contains("%")
-                ? ResolveConnectionString(
-                    triggerAttribute.ConnectionString.Replace("%", ""),
-                    nameof(MongoDbTriggerAttribute.ConnectionString))
-                : triggerAttribute.ConnectionString;
-
-        private string ResolveConnectionString(string unresolvedConnectionString, string propertyName)
+        private string ResolveDatabase()
         {
-            if (string.IsNullOrEmpty(unresolvedConnectionString))
-                return null;
+            string configPath = $"AzureFunctionsJobHost:MongoDatabase";
 
-            var resolvedString = _configuration.GetConnectionStringOrSetting(unresolvedConnectionString);
+            var value = _configuration.GetSection(configPath).Get<string>();
 
-            if (string.IsNullOrEmpty(resolvedString))
-                throw new InvalidOperationException($"Unable to resolve app setting for property '{nameof(MongoDbTriggerAttribute)}.{propertyName}'.");
+            if (string.IsNullOrEmpty(value))
+                throw new ArgumentException($"Unable to configuration key: '{configPath}'.");
 
-            return resolvedString;
+            return value;
+        }
+
+        private string ResolveConnectionString()
+        {
+            var configPath = $"AzureFunctionsJobHost:MongoConnectionString";
+
+            var value = _configuration.GetSection(configPath).Get<string>();
+
+            if (string.IsNullOrEmpty(value))
+                throw new ArgumentException($"Unable to configuration key: '{configPath}'.");
+
+            return value;
+        }
+
+        private string[] ResolveCollections()
+        {
+            var configPath = $"AzureFunctionsJobHost:MongoCollections";
+            var value = _configuration.GetSection(configPath).Get<string[]>();
+
+            if (value == null || value.Length == 0)
+                throw new ArgumentException($"Unable to configuration key: '{configPath}'.");
+
+            return value;
         }
     }
 }
