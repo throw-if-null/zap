@@ -2,8 +2,10 @@
 using Microsoft.Azure.WebJobs.Host.Listeners;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
+using MongoDbTrigger.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,21 +16,15 @@ namespace MongoDbTrigger.Listeners
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         private readonly ITriggeredFunctionExecutor _executor;
-        private readonly string _connectionString;
-        private readonly string _database;
-        private readonly string[] _collections;
+        MongoDbCollectionFactory _collectionFactory;
 
         private bool _disposedValue;
 
         public MongoDbListener(
-            string database,
-            string[] collections,
-            string connectionString,
+            MongoDbCollectionFactory collectionFactory,
             ITriggeredFunctionExecutor executor)
         {
-            _database = database;
-            _collections = collections;
-            _connectionString = connectionString;
+            _collectionFactory = collectionFactory;
             _executor = executor;
         }
 
@@ -41,16 +37,13 @@ namespace MongoDbTrigger.Listeners
 
         private async Task WatchAsync(CancellationToken cancellationToken)
         {
-            var database = new MongoClient(_connectionString).GetDatabase(_database);
-
             var childCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-            var tasks = new List<Task>(_collections.Length);
+            var collections = _collectionFactory.GetMongoCollection();
+            var tasks = new List<Task>(collections.Count());
 
-            foreach (var collectionName in _collections)
+            foreach (var collection in collections)
             {
-                var collection = database.GetCollection<dynamic>(collectionName);
-
                 var task = Watch(collection, childCancellation.Token);
 
                 tasks.Add(task);

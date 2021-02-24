@@ -1,5 +1,7 @@
 ﻿using Microsoft.Azure.WebJobs;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDbTrigger.Extensions;
+using MongoDbTrigger.Services;
 using System;
 
 namespace MongoDbTrigger
@@ -13,6 +15,8 @@ namespace MongoDbTrigger
         public static IWebJobsBuilder AddMongoDbTrigger(this IWebJobsBuilder builder)
         {
             _ = builder ?? throw new ArgumentNullException(nameof(builder));
+
+            builder.Services.AddSingleton<MongoDbCollectionFactory>();
 
             builder.AddExtension<MongoDbExtensionsProvider>();
 

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Azure.WebJobs.Description;
 using Microsoft.Azure.WebJobs.Host.Config;
-using Microsoft.Extensions.Configuration;
 using MongoDbTrigger.Bindings;
+using MongoDbTrigger.Services;
 using MongoDbTrigger.Triggers;
 
 namespace MongoDbTrigger.Extensions
@@ -9,9 +9,12 @@ namespace MongoDbTrigger.Extensions
     [Extension("MongoDb")]
     internal sealed class MongoDbExtensionsProvider : IExtensionConfigProvider
     {
-        private readonly IConfiguration _configuration;
+        private readonly MongoDbCollectionFactory _collectionFactory;
 
-        public MongoDbExtensionsProvider(IConfiguration configuration) => _configuration = configuration;
+        public MongoDbExtensionsProvider(MongoDbCollectionFactory collectionFactory)
+        {
+            _collectionFactory = collectionFactory;
+        }
 
         /// <summary>
         /// This callback is invoked by the WebJobs framework before the host starts execution.
@@ -20,6 +23,6 @@ namespace MongoDbTrigger.Extensions
         public void Initialize(ExtensionConfigContext context) =>
             context
                 .AddBindingRule<MongoDbTriggerAttribute>()
-                .BindToTrigger(new MongoDbBindingProvider(_configuration));
+                .BindToTrigger(new MongoDbBindingProvider(_collectionFactory));
     }
 }

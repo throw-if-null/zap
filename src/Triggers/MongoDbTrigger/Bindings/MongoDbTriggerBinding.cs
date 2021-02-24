@@ -4,6 +4,7 @@ using Microsoft.Azure.WebJobs.Host.Protocols;
 using Microsoft.Azure.WebJobs.Host.Triggers;
 using MongoDB.Driver;
 using MongoDbTrigger.Listeners;
+using MongoDbTrigger.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,22 +13,15 @@ namespace MongoDbTrigger.Bindings
 {
     internal class MongoDbTriggerBinding : ITriggerBinding
     {
-        private readonly string _database;
-        private readonly string[] _collections;
-        private readonly string _connectionString;
+        private readonly MongoDbCollectionFactory _collectionFactory;
 
         public Type TriggerValueType => typeof(ChangeStreamDocument<dynamic>);
 
         public IReadOnlyDictionary<string, Type> BindingDataContract { get; } = new Dictionary<string, Type>();
 
-        public MongoDbTriggerBinding(
-            string database,
-            string[] collections,
-            string connectionString)
+        public MongoDbTriggerBinding(MongoDbCollectionFactory collectionFactory)
         {
-            _database = database;
-            _collections = collections;
-            _connectionString = connectionString;
+            _collectionFactory = collectionFactory;
         }
 
         public Task<ITriggerData> BindAsync(object value, ValueBindingContext context)
@@ -44,18 +38,14 @@ namespace MongoDbTrigger.Bindings
         {
             return Task.FromResult<IListener>(
                 new MongoDbListener(
-                    _database,
-                    _collections,
-                    _connectionString,
+                    _collectionFactory,
                     context.Executor));
         }
 
         public ParameterDescriptor ToParameterDescriptor()
         {
-            return new MongoDbTriggerParameterDescriptor
+            return new ParameterDescriptor
             {
-                DatabaseName = _database,
-                Collections = string.Join(',', _collections),
                 Name = "MongoDbTrigger"
             };
         }
