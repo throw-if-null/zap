@@ -48,17 +48,17 @@ namespace MongoDbTrigger.Services
     {
         public static string GetDatabaseName(this IConfiguration configuration)
         {
-            return configuration.GetValue<string>("AzureFunctionsJobHost:MongoDatabase");
+            return configuration.GetValue<string>("AzureFunctionsJobHost:MongoOptions:Database");
         }
 
         public static string GetConnectionString(this IConfiguration configuration)
         {
-            return configuration.GetValue<string>("AzureFunctionsJobHost:MongoConnectionString");
+            return configuration.GetValue<string>("AzureFunctionsJobHost:MongoOptions:ConnectionString");
         }
 
         public static string[] GetCollectionNames(this IConfiguration configuration)
         {
-            return configuration.GetValue<string[]>("AzureFunctionsJobHost:MongoCollections");
+            return configuration.GetValue<string[]>("AzureFunctionsJobHost:MongoOptions:Collections");
         }
 
         private static T GetValue<T>(this IConfiguration configuration, string configPath)

@@ -9,7 +9,10 @@
     }
   },
 
-  "MongoConnectionString": "mongodb+srv://testUser:testUser@testcluster.okicx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
-  "MongoDatabase": "test",
-  "MongoCollections": [ "items", "things" ]
+  "MongoOptions": {
+    "OperationTypes": ["insert", "update", "replace"],
+    "ConnectionString": "mongodb+srv://testUser:testUser@testcluster.okicx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+    "Database": "test",
+    "Collections": [ "items", "things" ]
+  }
 }

@@ -1,28 +1,39 @@
-﻿using Microsoft.Azure.WebJobs;
+﻿using MediatR;
+using Microsoft.Azure.WebJobs;
 using MongoDB.Driver;
+using MongoDbFunction.Commands.ProcessDbEvent;
 using MongoDbTrigger.Triggers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MongoDbFunction
 {
     // https://github.com/Azure/azure-functions-core-tools/issues/2294 - blocked upgrade to .net 5
-    public static class Function
+    public class Function
     {
-        [FunctionName("MongoDbFunction")]
-        public static void Run([MongoDbTrigger] ChangeStreamDocument<dynamic> document)
-        {
-            var json = JsonConvert.SerializeObject(document.FullDocument);
+        private readonly IMediator _mediator;
 
-            if (document.CollectionNamespace.CollectionName.Equals("items", StringComparison.InvariantCultureIgnoreCase))
-            {
-                var item = JsonConvert.DeserializeObject<Item>(json);
-            }
-            else if (document.CollectionNamespace.CollectionName.Equals("things", StringComparison.InvariantCultureIgnoreCase))
-            {
-                var thing = JsonConvert.DeserializeObject<Thing>(json);
-            }
+        public Function(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        [FunctionName("MongoDbFunction")]
+        public Task Run([MongoDbTrigger] ChangeStreamDocument<dynamic> document)
+        {
+            return _mediator.Send(new ProcessDbEventRequest { Document = document });
+            //var json = JsonConvert.SerializeObject(document.FullDocument);
+
+            //if (document.CollectionNamespace.CollectionName.Equals("items", StringComparison.InvariantCultureIgnoreCase))
+            //{
+            //    var item = JsonConvert.DeserializeObject<Item>(json);
+            //}
+            //else if (document.CollectionNamespace.CollectionName.Equals("things", StringComparison.InvariantCultureIgnoreCase))
+            //{
+            //    var thing = JsonConvert.DeserializeObject<Thing>(json);
+            //}
         }
     }
 
