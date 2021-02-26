@@ -31,6 +31,7 @@ namespace MongoDbFunction.Commands.ProcessDbEvent
             return _mediator.Send(new ProcessDocumentRequest
             {
                 CollectionName = request.Document.CollectionNamespace.CollectionName,
+                HandlerNamespace = _options.Collections.First(x => x.Name == request.Document.CollectionNamespace.CollectionName).HandlerNamespace,
                 Values = request.Document.FullDocument as IDictionary<string, object>
             });
         }

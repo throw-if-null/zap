@@ -10,6 +10,7 @@ using MongoDbFunction.Commands.ProcessItem;
 using MongoDbFunction.Commands.ProcessThing;
 using MongoDbFunction.Commands.SendNotification;
 using MongoDbTrigger;
+using System.Collections.ObjectModel;
 
 [assembly: FunctionsStartup(typeof(MongoDbFunction.Startup))]
 namespace MongoDbFunction
@@ -18,10 +19,21 @@ namespace MongoDbFunction
     {
         public void Configure(IWebJobsBuilder builder)
         {
+            //builder
+            //    .Services
+            //    .AddOptions<Collection<CollectionOptions>>()
+            //    .Configure<IConfiguration>((settings, configuration) => { configuration.Bind("AzureFunctionsJobHost:MongoOptions:CollectionOptions", settings); });
+
             builder
                 .Services
                 .AddOptions<MongoOptions>()
-                .Configure<IConfiguration>((settings, configuration) => { configuration.Bind("AzureFunctionsJobHost:MongoOptions", settings); });
+                .Configure<IConfiguration>((settings, configuration) =>
+                {
+                    var collections = configuration.GetSection("AzureFunctionsJobHost:MongoOptions:CollectionOptions").Get<Collection<CollectionOptions>>();
+                    settings.Collections = collections;
+
+                    configuration.Bind("AzureFunctionsJobHost:MongoOptions", settings);
+                });
 
             builder.Services.AddMediatR(new[]
             {
@@ -33,7 +45,7 @@ namespace MongoDbFunction
             });
 
             builder.Services.AddTransient<IRequestHandler<ProcessDbEventRequest, Unit>, ProcessDbEventHandler>();
-            builder.Services.AddTransient<IRequestHandler<ProcessDocumentRequest, Unit>, ProcessDocumentHandler>();
+            builder.Services.AddTransient<IRequestHandler<ProcessDocumentRequest>, ProcessDocumentHandler>();
             builder.Services.AddTransient<IRequestHandler<ProcessItemRequest, Unit>, ProcessItemHandler>();
             builder.Services.AddTransient<IRequestHandler<ProcessThingRequest, Unit>, ProcessThingHandler>();
             builder.Services.AddTransient<IRequestHandler<SendNotificationRequest, Unit>, SendNotificationHandler>();

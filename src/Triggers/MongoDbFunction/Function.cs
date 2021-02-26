@@ -4,7 +4,6 @@ using MongoDB.Driver;
 using MongoDbFunction.Commands.ProcessDbEvent;
 using MongoDbTrigger.Triggers;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -24,16 +23,6 @@ namespace MongoDbFunction
         public Task Run([MongoDbTrigger] ChangeStreamDocument<dynamic> document)
         {
             return _mediator.Send(new ProcessDbEventRequest { Document = document });
-            //var json = JsonConvert.SerializeObject(document.FullDocument);
-
-            //if (document.CollectionNamespace.CollectionName.Equals("items", StringComparison.InvariantCultureIgnoreCase))
-            //{
-            //    var item = JsonConvert.DeserializeObject<Item>(json);
-            //}
-            //else if (document.CollectionNamespace.CollectionName.Equals("things", StringComparison.InvariantCultureIgnoreCase))
-            //{
-            //    var thing = JsonConvert.DeserializeObject<Thing>(json);
-            //}
         }
     }
 

@@ -7,6 +7,8 @@ namespace MongoDbFunction.Commands.ProcessDocument
     {
         public string CollectionName { get; set; }
 
+        public string HandlerNamespace { get; set; }
+
         public IDictionary<string, object> Values { get; set; }
     }
 }

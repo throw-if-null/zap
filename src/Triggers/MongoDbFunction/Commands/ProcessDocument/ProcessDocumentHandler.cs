@@ -1,13 +1,13 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Options;
-using MongoDbFunction.Commands.ProcessItem;
-using MongoDbFunction.Commands.ProcessThing;
+using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace MongoDbFunction.Commands.ProcessDocument
 {
-    public class ProcessDocumentHandler : IRequestHandler<ProcessDocumentRequest>
+    public class ProcessDocumentHandler : AsyncRequestHandler<ProcessDocumentRequest>
     {
         private readonly MongoOptions _options;
         private readonly IMediator _mediator;
@@ -18,14 +18,28 @@ namespace MongoDbFunction.Commands.ProcessDocument
             _mediator = mediator;
         }
 
-        public Task<Unit> Handle(ProcessDocumentRequest request, CancellationToken cancellationToken)
+        protected override async Task Handle(ProcessDocumentRequest request, CancellationToken cancellationToken)
         {
-            return (request.CollectionName.ToLowerInvariant()) switch
-            {
-                "items" => _mediator.Send(new ProcessItemRequest { Values = request.Values }, cancellationToken),
-                "things" => _mediator.Send(new ProcessThingRequest { Values = request.Values }, cancellationToken),
-                _ => Unit.Task,
-            };
+            Type type = Type.GetType($"MongoDbFunction.Commands.{request.HandlerNamespace}.{request.HandlerNamespace}Request");
+
+            if (type == null)
+                return;
+
+            // Implement Type caching.
+            var instance = Activator.CreateInstance(type);
+            var property = type.GetProperty("Values");
+            property.SetValue(instance, request.Values);
+
+            var method = typeof(ISender).GetMethods().FirstOrDefault(x => x.Name == "Send" && x.IsGenericMethod == false);
+
+            if (method == null)
+                return;
+
+            //var send = method.MakeGenericMethod(type);
+
+
+            var task = (Task<object>)method.Invoke(_mediator, new[] { instance, cancellationToken });
+            await task;
         }
     }
 }

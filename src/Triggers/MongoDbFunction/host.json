@@ -13,6 +13,16 @@
     "OperationTypes": ["insert", "update", "replace"],
     "ConnectionString": "mongodb+srv://testUser:testUser@testcluster.okicx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
     "Database": "test",
+    "CollectionOptions": [
+      {
+        "Name": "items",
+        "HandlerNamespace": "ProcessItem"
+      },
+      {
+        "Name": "things",
+        "HandlerNamespace": "ProcessThing"
+      }
+    ],
     "Collections": [ "items", "things" ]
   }
 }
