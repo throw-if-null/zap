@@ -4,6 +4,7 @@ using MongoDB.Driver;
 using MongoDbFunction.Commands.ProcessDocument;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,10 +13,10 @@ namespace MongoDbFunction.Commands.ProcessDbEvent
 {
     public class ProcessDbEventHandler : IRequestHandler<ProcessDbEventRequest>
     {
-        private readonly MongoOptions _options;
+        private readonly Collection<CollectionOptions> _options;
         private readonly IMediator _mediator;
 
-        public ProcessDbEventHandler(IOptions<MongoOptions> options, IMediator mediator)
+        public ProcessDbEventHandler(IOptions<Collection<CollectionOptions>> options, IMediator mediator)
         {
             _options = options.Value;
             _mediator = mediator;
@@ -23,7 +24,9 @@ namespace MongoDbFunction.Commands.ProcessDbEvent
 
         public Task<Unit> Handle(ProcessDbEventRequest request, CancellationToken cancellationToken)
         {
-            var operations = GetOperations(_options.OperationTypes);
+            var collection = _options.First(x => x.Name == request.Document.CollectionNamespace.CollectionName);
+
+            var operations = GetOperations(collection.OperationTypes);
 
             if (!operations.Any(x => x == request.Document.OperationType))
                 return Unit.Task;
@@ -31,7 +34,8 @@ namespace MongoDbFunction.Commands.ProcessDbEvent
             return _mediator.Send(new ProcessDocumentRequest
             {
                 CollectionName = request.Document.CollectionNamespace.CollectionName,
-                HandlerNamespace = _options.Collections.First(x => x.Name == request.Document.CollectionNamespace.CollectionName).HandlerNamespace,
+                AssemblyName = collection.AssemblyName,
+                HandlerRequestFullQualifiedName = collection.HandlerRequestFullQualifiedName,
                 Values = request.Document.FullDocument as IDictionary<string, object>
             });
         }

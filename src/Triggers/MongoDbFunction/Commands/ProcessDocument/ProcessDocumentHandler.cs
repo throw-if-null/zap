@@ -1,5 +1,4 @@
 ﻿using MediatR;
-using Microsoft.Extensions.Options;
 using System;
 using System.Linq;
 using System.Threading;
@@ -9,24 +8,22 @@ namespace MongoDbFunction.Commands.ProcessDocument
 {
     public class ProcessDocumentHandler : AsyncRequestHandler<ProcessDocumentRequest>
     {
-        private readonly MongoOptions _options;
         private readonly IMediator _mediator;
 
-        public ProcessDocumentHandler(IOptions<MongoOptions> options, IMediator mediator)
+        public ProcessDocumentHandler(IMediator mediator)
         {
-            _options = options.Value;
             _mediator = mediator;
         }
 
         protected override async Task Handle(ProcessDocumentRequest request, CancellationToken cancellationToken)
         {
-            Type type = Type.GetType($"MongoDbFunction.Commands.{request.HandlerNamespace}.{request.HandlerNamespace}Request");
+            // Implement Type caching.
+            var instance = Activator.CreateInstance(request.AssemblyName, request.HandlerRequestFullQualifiedName)?.Unwrap();
 
-            if (type == null)
+            if (instance == null)
                 return;
 
-            // Implement Type caching.
-            var instance = Activator.CreateInstance(type);
+            var type = instance.GetType();
             var property = type.GetProperty("Values");
             property.SetValue(instance, request.Values);
 
@@ -34,9 +31,6 @@ namespace MongoDbFunction.Commands.ProcessDocument
 
             if (method == null)
                 return;
-
-            //var send = method.MakeGenericMethod(type);
-
 
             var task = (Task<object>)method.Invoke(_mediator, new[] { instance, cancellationToken });
             await task;

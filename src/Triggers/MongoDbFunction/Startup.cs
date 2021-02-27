@@ -19,20 +19,12 @@ namespace MongoDbFunction
     {
         public void Configure(IWebJobsBuilder builder)
         {
-            //builder
-            //    .Services
-            //    .AddOptions<Collection<CollectionOptions>>()
-            //    .Configure<IConfiguration>((settings, configuration) => { configuration.Bind("AzureFunctionsJobHost:MongoOptions:CollectionOptions", settings); });
-
             builder
                 .Services
-                .AddOptions<MongoOptions>()
+                .AddOptions<Collection<CollectionOptions>>()
                 .Configure<IConfiguration>((settings, configuration) =>
                 {
-                    var collections = configuration.GetSection("AzureFunctionsJobHost:MongoOptions:CollectionOptions").Get<Collection<CollectionOptions>>();
-                    settings.Collections = collections;
-
-                    configuration.Bind("AzureFunctionsJobHost:MongoOptions", settings);
+                    configuration.Bind("AzureFunctionsJobHost:MongoOptions:CollectionOptions", settings);
                 });
 
             builder.Services.AddMediatR(new[]

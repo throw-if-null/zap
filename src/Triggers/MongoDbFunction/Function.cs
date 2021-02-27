@@ -25,28 +25,4 @@ namespace MongoDbFunction
             return _mediator.Send(new ProcessDbEventRequest { Document = document });
         }
     }
-
-    public class BaseObject
-    {
-        [JsonProperty("_id")]
-        public string Id { get; set; }
-    }
-
-    public class Item : BaseObject
-    {
-        public string Test { get; set; }
-
-        public int Number { get; set; }
-
-        public bool Yes { get; set; }
-
-        public IEnumerable<string> Children { get; set; }
-    }
-
-    public class Thing : BaseObject
-    {
-        public int Number { get; set; }
-
-        public int Number2 { get; set; }
-    }
 }

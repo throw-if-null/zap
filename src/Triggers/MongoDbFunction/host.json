@@ -10,19 +10,21 @@
   },
 
   "MongoOptions": {
-    "OperationTypes": ["insert", "update", "replace"],
     "ConnectionString": "mongodb+srv://testUser:testUser@testcluster.okicx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
     "Database": "test",
     "CollectionOptions": [
       {
         "Name": "items",
-        "HandlerNamespace": "ProcessItem"
+        "AssemblyName": "MongoDbFunction",
+        "HandlerRequestFullQualifiedName": "MongoDbFunction.Commands.ProcessItem.ProcessItemRequest",
+        "OperationTypes": [ "insert", "update", "replace" ]
       },
       {
         "Name": "things",
-        "HandlerNamespace": "ProcessThing"
+        "AssemblyName": "MongoDbFunction",
+        "HandlerRequestFullQualifiedName": "MongoDbFunction.Commands.ProcessThing.ProcessThingRequest",
+        "OperationTypes": [ "insert", "update", "replace" ]
       }
-    ],
-    "Collections": [ "items", "things" ]
+    ]
   }
 }

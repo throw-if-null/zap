@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -7,63 +7,40 @@ namespace MongoDbTrigger.Services
 {
     internal class MongoDbCollectionFactory
     {
-        private static readonly Func<IConfiguration, IMongoClient> GetClient = delegate (IConfiguration configuration)
+        private static readonly Func<MongoDbTriggerOptions, IMongoClient> GetClient = delegate (MongoDbTriggerOptions options)
         {
-            return new MongoClient(configuration.GetConnectionString());
+            return new MongoClient(options.ConnectionString);
         };
 
-        private static readonly Func<IConfiguration, IMongoDatabase> GetDatabase = delegate (IConfiguration configuration)
+        private static readonly Func<MongoDbTriggerOptions, IMongoDatabase> GetDatabase = delegate (MongoDbTriggerOptions options)
         {
-            return GetClient(configuration).GetDatabase(configuration.GetDatabaseName());
+            return GetClient(options).GetDatabase(options.Database);
         };
 
-        private static readonly Func<IConfiguration, IEnumerable<IMongoCollection<dynamic>>> GetColections = delegate (IConfiguration configuration)
+        private static readonly Func<MongoDbTriggerOptions, IEnumerable<IMongoCollection<dynamic>>> GetColections = delegate (MongoDbTriggerOptions options)
         {
             var collections = new List<IMongoCollection<dynamic>>();
 
-            foreach(var collectionName in configuration.GetCollectionNames())
+            foreach(var collectionName in options.Collections)
             {
-                collections.Add(GetDatabase(configuration).GetCollection<dynamic>(collectionName));
+                collections.Add(GetDatabase(options).GetCollection<dynamic>(collectionName));
             }
 
             return collections;
         };
 
-        private readonly IConfiguration _configuration;
+        private readonly MongoDbTriggerOptions _options;
 
-        public MongoDbCollectionFactory(IConfiguration configuration)
+        public MongoDbCollectionFactory(IOptions<MongoDbTriggerOptions> options)
         {
-            _configuration = configuration;
+            _options = options.Value;
         }
 
         public IEnumerable<IMongoCollection<dynamic>> GetMongoCollection()
         {
-            var collections = GetColections(_configuration);
+            var collections = GetColections(_options);
 
             return collections;
-        }
-    }
-
-    internal static class ConfigurationExtensions
-    {
-        public static string GetDatabaseName(this IConfiguration configuration)
-        {
-            return configuration.GetValue<string>("AzureFunctionsJobHost:MongoOptions:Database");
-        }
-
-        public static string GetConnectionString(this IConfiguration configuration)
-        {
-            return configuration.GetValue<string>("AzureFunctionsJobHost:MongoOptions:ConnectionString");
-        }
-
-        public static string[] GetCollectionNames(this IConfiguration configuration)
-        {
-            return configuration.GetValue<string[]>("AzureFunctionsJobHost:MongoOptions:Collections");
-        }
-
-        private static T GetValue<T>(this IConfiguration configuration, string configPath)
-        {
-            return configuration.GetSection(configPath).Get<T>();
         }
     }
 }
