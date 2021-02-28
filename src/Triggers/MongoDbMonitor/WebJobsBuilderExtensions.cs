@@ -3,6 +3,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDbMonitor;
+using MongoDbMonitor.Commands.Common;
 using MongoDbMonitor.Commands.ProcessChangeEvent;
 using MongoDbMonitor.Commands.ProcessDocument;
 using MongoDbMonitor.Commands.ResolveCollection;
@@ -32,8 +33,10 @@ namespace MongoDbFunction
             });
 
             builder.Services.AddTransient<IRequestHandler<ProcessChangeEventRequest, Unit>, ProcessChangeEventHandler>();
-            builder.Services.AddTransient<IRequestHandler<ResolveCollectionRequest>, ResolveCollectionHandler>();
+            builder.Services.AddTransient<IRequestHandler<ResolveCollectionRequest, Unit>, ResolveCollectionHandler>();
             builder.Services.AddTransient<IRequestHandler<SendNotificationRequest, Unit>, SendNotificationHandler>();
+
+            builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ErrorHandlingPipelineBehavior<,>));
 
             builder.AddMongoDbTrigger();
 
@@ -44,11 +47,11 @@ namespace MongoDbFunction
 
         public static IServiceCollection RegisterDocumentHandler<TRequest, THandler>(this IServiceCollection services)
             where TRequest : ProcessDocumentRequest
-            where THandler : AsyncRequestHandler<TRequest>
+            where THandler : class, IErrorHandlingRequestHanlder<TRequest, Unit>
         {
             services.AddMediatR(typeof(TRequest));
 
-            services.AddTransient<IRequestHandler<TRequest>, THandler>();
+            services.AddTransient<IRequestHandler<TRequest, Unit>, THandler>();
 
             return services;
         }

@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using MongoDbMonitor.Commands.Common;
 using MongoDbMonitor.Commands.ResolveCollection;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace MongoDbMonitor.Commands.ProcessChangeEvent
 {
-    internal class ProcessChangeEventHandler : IRequestHandler<ProcessChangeEventRequest>
+    internal class ProcessChangeEventHandler : IErrorHandlingRequestHanlder<ProcessChangeEventRequest, Unit>
     {
         private readonly Collection<CollectionOptions> _options;
         private readonly IMediator _mediator;
