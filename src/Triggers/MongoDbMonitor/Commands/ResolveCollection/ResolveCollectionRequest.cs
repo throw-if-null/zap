@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using MongoDbMonitor.Commands.Common;
+using MongoDbMonitor.Commands.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -18,7 +19,17 @@ namespace MongoDbMonitor.Commands.ResolveCollection
 
         public void OnError([NotNull] Exception ex)
         {
-            return;
+            switch (ex)
+            {
+                case InvalidRequestTypeException _:
+                    throw ex;
+
+                case MissingRequiredPropertyException _:
+                    throw ex;
+
+                default:
+                    return;
+            }
         }
     }
 }

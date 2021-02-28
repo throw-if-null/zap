@@ -12,6 +12,9 @@ namespace MongoDbMonitor.Commands.ProcessDocument
 
         public IDictionary<string, object> Values { get; set; }
 
-        public abstract void OnError([NotNull] Exception ex);
+        public void OnError([NotNull] Exception ex)
+        {
+            return;
+        }
     }
 }

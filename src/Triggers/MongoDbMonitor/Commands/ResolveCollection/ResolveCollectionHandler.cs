@@ -1,5 +1,7 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Caching.Memory;
 using MongoDbMonitor.Commands.Common;
+using MongoDbMonitor.Commands.Exceptions;
 using System;
 using System.Linq;
 using System.Threading;
@@ -9,40 +11,66 @@ namespace MongoDbMonitor.Commands.ResolveCollection
 {
     internal class ResolveCollectionHandler : IErrorHandlingRequestHanlder<ResolveCollectionRequest, Unit>
     {
-        private readonly IMediator _mediator;
+        private const string VALUES_PROPERTY_NAME = "Values";
+        private const string COLLECTION_NAME_PROPERTY_NAME = "CollectionName";
+        private const string SEND_METHOD_NAME = "Send";
 
-        public ResolveCollectionHandler(IMediator mediator)
+        private readonly IMediator _mediator;
+        private readonly IMemoryCache _cache;
+
+        public ResolveCollectionHandler(IMediator mediator, IMemoryCache cache)
         {
             _mediator = mediator;
+            _cache = cache;
         }
 
         public async Task<Unit> Handle(ResolveCollectionRequest request, CancellationToken cancellationToken)
         {
-            // Implement Type caching.
-            var instance = Activator.CreateInstance(request.AssemblyName, request.HandlerRequestFullQualifiedName)?.Unwrap();
+            var key = $"{request.AssemblyName}-{request.HandlerRequestFullQualifiedName}";
+
+            object instance = _cache.Get(key);
 
             if (instance == null)
-                return Unit.Value;
+                instance = _cache.Set(key, CreateInstance(request));
 
-            var type = instance.GetType();
-
-            var valuesProperty = type.GetProperty("Values");
-            valuesProperty.SetValue(instance, request.Values);
-
-            var collectionNameProperty = type.GetProperty("CollectionName");
-            collectionNameProperty.SetValue(instance, request.CollectionName);
-
-            dynamic method = typeof(ISender).GetMethods().FirstOrDefault(x => x.Name == "Send" && x.IsGenericMethod == false);
-
-            if (method == null)
-                return Unit.Value;
-
-            if (method.ReturnType != typeof(Task<object>))
-                return Unit.Value;
+            dynamic method =
+                typeof(ISender)
+                    .GetMethods()
+                    .First(
+                        x =>
+                            x.Name == SEND_METHOD_NAME &&
+                            x.IsGenericMethod == false &&
+                            x.ReturnType == typeof(Task<object>));
 
             _ = await method.Invoke(_mediator, new[] { instance, cancellationToken });
 
             return Unit.Value;
+        }
+
+        private static object CreateInstance(ResolveCollectionRequest request)
+        {
+            var instance = Activator.CreateInstance(request.AssemblyName, request.HandlerRequestFullQualifiedName)?.Unwrap();
+
+            if (instance == null)
+                throw new InvalidRequestTypeException(request.AssemblyName, request.HandlerRequestFullQualifiedName);
+
+            var type = instance.GetType();
+
+            var valuesProperty = type.GetProperty(VALUES_PROPERTY_NAME);
+
+            if (valuesProperty == null)
+                throw new MissingRequiredPropertyException(request.HandlerRequestFullQualifiedName, VALUES_PROPERTY_NAME);
+
+            valuesProperty.SetValue(instance, request.Values);
+
+            var collectionNameProperty = type.GetProperty(COLLECTION_NAME_PROPERTY_NAME);
+
+            if (collectionNameProperty == null)
+                throw new MissingRequiredPropertyException(request.HandlerRequestFullQualifiedName, COLLECTION_NAME_PROPERTY_NAME);
+
+            collectionNameProperty.SetValue(instance, request.CollectionName);
+
+            return instance;
         }
     }
 }

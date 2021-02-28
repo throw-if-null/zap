@@ -25,20 +25,26 @@ namespace MongoDbMonitor.Commands.ProcessChangeEvent
 
         public Task<Unit> Handle(ProcessChangeEventRequest request, CancellationToken cancellationToken)
         {
-            var collection = _options.First(x => x.Name == request.Document.CollectionNamespace.CollectionName);
+            var document = request.Document;
+            var collectionName = document.CollectionNamespace.CollectionName;
+            var operationType = document.OperationType;
 
+            var collection = _options.First(x => x.Name == collectionName);
             var operations = GetOperations(collection.OperationTypes);
 
-            if (!operations.Any(x => x == request.Document.OperationType))
+            if (operations.All(x => x != operationType))
                 return Unit.Task;
 
-            return _mediator.Send(new ResolveCollectionRequest
-            {
-                CollectionName = request.Document.CollectionNamespace.CollectionName,
-                AssemblyName = collection.AssemblyName,
-                HandlerRequestFullQualifiedName = collection.HandlerRequestFullQualifiedName,
-                Values = request.Document.FullDocument as IDictionary<string, object>
-            });
+            return
+                _mediator.Send(
+                    new ResolveCollectionRequest
+                    {
+                        CollectionName = document.CollectionNamespace.CollectionName,
+                        AssemblyName = collection.AssemblyName,
+                        HandlerRequestFullQualifiedName = collection.HandlerRequestFullQualifiedName,
+                        Values = document.FullDocument as IDictionary<string, object>
+                    },
+                    cancellationToken);
         }
 
         private static IEnumerable<ChangeStreamOperationType> GetOperations(IEnumerable<string> operationNames)

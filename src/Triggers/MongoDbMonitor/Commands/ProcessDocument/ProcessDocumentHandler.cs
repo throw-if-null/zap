@@ -1,8 +1,8 @@
 ﻿using MediatR;
 using MongoDB.Bson;
 using MongoDbMonitor.Commands.Common;
+using MongoDbMonitor.Commands.Exceptions;
 using MongoDbMonitor.Commands.SendNotification;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,14 +18,15 @@ namespace MongoDbMonitor.Commands.ProcessDocument
             Mediator = mediator;
         }
 
-        protected abstract Task<ObjectId> GetObjectId(IDictionary<string, object> values);
+        protected abstract string PropertyToExtract { get; }
 
         async Task<Unit> IRequestHandler<T, Unit>.Handle(T request, CancellationToken cancellationToken)
         {
-            var id = await GetObjectId(request.Values);
+            if (!request.Values.TryGetValue(PropertyToExtract, out var value))
+                throw new PropertyNotFoundInDocumentException(PropertyToExtract);
 
-            if (id == ObjectId.Empty)
-                return Unit.Value;
+            if (!ObjectId.TryParse(value.ToString(), out var id))
+                throw new InvalidObjectIdException(value.ToString());
 
             await Mediator.Send(new SendNotificationRequest
             {

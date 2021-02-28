@@ -2,6 +2,7 @@
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MongoDbMonitor;
 using MongoDbMonitor.Commands.Common;
 using MongoDbMonitor.Commands.ProcessChangeEvent;
@@ -24,6 +25,10 @@ namespace MongoDbFunction
                 {
                     configuration.Bind("AzureFunctionsJobHost:MongoOptions:CollectionOptions", settings);
                 });
+
+            builder.Services.AddMemoryCache();
+
+            builder.Services.AddLogging(x => x.AddConsole());
 
             builder.Services.AddMediatR(new[]
             {
