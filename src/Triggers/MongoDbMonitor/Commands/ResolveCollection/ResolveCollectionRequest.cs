@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using System.Collections.Generic;
 
-namespace MongoDbFunction.Commands.ProcessDocument
+namespace MongoDbMonitor.Commands.ResolveCollection
 {
-    public sealed class ProcessDocumentRequest : IRequest
+    internal class ResolveCollectionRequest : IRequest
     {
         public string CollectionName { get; set; }
 

@@ -1,10 +1,8 @@
-﻿using MediatR;
-using System.Collections.Generic;
+﻿using MongoDbMonitor.Commands.ProcessDocument;
 
 namespace MongoDbFunction.Commands.ProcessThing
 {
-    public sealed class ProcessThingRequest : IRequest
+    public sealed class ProcessThingRequest : ProcessDocumentRequest
     {
-        public IDictionary<string, object> Values { get; set; }
     }
 }

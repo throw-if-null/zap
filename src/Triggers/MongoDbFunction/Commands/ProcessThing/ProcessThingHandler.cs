@@ -1,29 +1,26 @@
 ﻿using MediatR;
 using MongoDB.Bson;
-using MongoDbFunction.Commands.SendNotification;
-using System.Threading;
+using MongoDbMonitor.Commands.ProcessDocument;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MongoDbFunction.Commands.ProcessThing
 {
-    public class ProcessThingHandler : IRequestHandler<ProcessThingRequest>
+    public class ProcessThingHandler : ProcessDocumentHandler<ProcessThingRequest>
     {
-        private readonly IMediator _mediator;
-
-        public ProcessThingHandler(IMediator mediator)
+        public ProcessThingHandler(IMediator mediator) : base(mediator)
         {
-            _mediator = mediator;
         }
 
-        public Task<Unit> Handle(ProcessThingRequest request, CancellationToken cancellationToken)
+        protected override Task<ObjectId> GetObjectId(IDictionary<string, object> values)
         {
-            if (!request.Values.TryGetValue("_id", out var id))
-                return Unit.Task;
+            if (!values.TryGetValue("_id", out var id))
+                return Task.FromResult(ObjectId.Empty);
 
             if (!ObjectId.TryParse(id.ToString(), out var objectId))
-                return Unit.Task;
+                return Task.FromResult(ObjectId.Empty);
 
-            return _mediator.Send(new SendNotificationRequest { CollectionName = "things", Id = objectId }, cancellationToken);
+            return Task.FromResult(objectId);
         }
     }
 }

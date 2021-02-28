@@ -16,7 +16,7 @@ namespace MongoDbTrigger.Listeners
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         private readonly ITriggeredFunctionExecutor _executor;
-        MongoDbCollectionFactory _collectionFactory;
+        private readonly MongoDbCollectionFactory _collectionFactory;
 
         private bool _disposedValue;
 
@@ -78,7 +78,7 @@ namespace MongoDbTrigger.Listeners
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         protected virtual void Dispose(bool disposing)

@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using MongoDB.Bson;
 
-namespace MongoDbFunction.Commands.SendNotification
+namespace MongoDbMonitor.Commands.SendNotification
 {
-    public sealed class SendNotificationRequest : IRequest
+    internal class SendNotificationRequest : IRequest
     {
         public string CollectionName { get; set; }
 

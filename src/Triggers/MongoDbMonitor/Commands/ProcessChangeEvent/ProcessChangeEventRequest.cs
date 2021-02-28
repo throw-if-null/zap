@@ -1,9 +1,9 @@
 ﻿using MediatR;
 using MongoDB.Driver;
 
-namespace MongoDbFunction.Commands.ProcessDbEvent
+namespace MongoDbMonitor.Commands.ProcessChangeEvent
 {
-    public sealed class ProcessDbEventRequest : IRequest
+    internal class ProcessChangeEventRequest : IRequest
     {
         public ChangeStreamDocument<dynamic> Document { get; set; }
     }

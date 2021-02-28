@@ -2,9 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDbFunction.Commands.SendNotification
+namespace MongoDbMonitor.Commands.SendNotification
 {
-    public class SendNotificationHandler : IRequestHandler<SendNotificationRequest>
+    internal class SendNotificationHandler : IRequestHandler<SendNotificationRequest>
     {
         public Task<Unit> Handle(SendNotificationRequest request, CancellationToken cancellationToken)
         {
