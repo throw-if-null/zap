@@ -65,15 +65,7 @@ namespace MongoDbTrigger.Listeners
                 TriggerValue = document
             };
 
-            try
-            {
-                await _executor.TryExecuteAsync(input, cancellation);
-            }
-            catch
-            {
-                // We don't want any function errors to stop the execution
-                // schedule. Errors will be logged to Dashboard already.
-            }
+            await _executor.TryExecuteAsync(input, cancellation);
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

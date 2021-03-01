@@ -11,8 +11,8 @@ namespace MongoDbFunction
     {
         public void Configure(IWebJobsBuilder builder)
         {
-            builder.Services.RegisterDocumentHandler<ProcessItemRequest, ProcessItemHandler>();
-            builder.Services.RegisterDocumentHandler<ProcessThingRequest, ProcessThingHandler>();
+            builder.Services.RegisterDocumentHandler<ProcessItemRequest>();
+            builder.Services.RegisterDocumentHandler<ProcessThingRequest>();
 
             builder.RegisterMonitor();
         }

@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
 using MongoDbMonitor.CrossCutting;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,27 +18,15 @@ namespace MongoDbMonitor.Commands.Common
         public async Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
         {
             var requestType = request.GetType().Name;
+
+            _logger.LogDebug("{RequestType} - started.", requestType);
+
             var stopwatch = ValueStopwatch.StartNew();
+            var response = await next();
 
-            try
-            {
-                _logger.LogDebug("{RequestType} started.", requestType);
+            _logger.LogDebug("{RequestType} - finished. {Elapsed}", requestType, stopwatch.GetElapsedTime().Milliseconds.ToString());
 
-                var response = await next();
-
-                _logger.LogDebug("{RequestType} - finished. {Elapsed}", requestType, stopwatch.GetElapsedTime().Milliseconds.ToString());
-
-                return response;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "{RequestType} failed.", requestType);
-
-                var behavior = (IOnRequestProcessingError)request;
-                behavior.OnError(ex);
-
-                return default;
-            }
+            return response;
         }
     }
 }

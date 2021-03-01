@@ -1,14 +1,12 @@
 ﻿using MediatR;
-using MongoDbMonitor.Commands.ProcessDocument;
+using MongoDbMonitor.Commands.ExtractDocumentIdentifier;
 
 namespace MongoDbFunction.Commands.ProcessItem
 {
-    public class ProcessItemHandler : ProcessDocumentHandler<ProcessItemRequest>
+    public class ProcessItemHandler : ExtractDocumentIdentifierHandler<ProcessItemRequest>
     {
         public ProcessItemHandler(IMediator mediator) : base(mediator)
         {
         }
-
-        protected override string PropertyToExtract => "_id";
     }
 }

@@ -1,13 +1,18 @@
 ﻿using MediatR;
+using MediatR.Pipeline;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDbMonitor;
 using MongoDbMonitor.Commands.Common;
+using MongoDbMonitor.Commands.Common.ExceptionHandlers.ExtractDocumentIdentifier;
+using MongoDbMonitor.Commands.Common.ExceptionHandlers.ResolveCollectionType;
+using MongoDbMonitor.Commands.Common.ExceptionHandlers.SendNotification;
+using MongoDbMonitor.Commands.Exceptions;
+using MongoDbMonitor.Commands.ExtractDocumentIdentifier;
 using MongoDbMonitor.Commands.ProcessChangeEvent;
-using MongoDbMonitor.Commands.ProcessDocument;
-using MongoDbMonitor.Commands.ResolveCollection;
+using MongoDbMonitor.Commands.ResolveCollectionType;
 using MongoDbMonitor.Commands.SendNotification;
 using MongoDbTrigger;
 using System.Collections.ObjectModel;
@@ -33,15 +38,33 @@ namespace MongoDbFunction
             builder.Services.AddMediatR(new[]
             {
                 typeof(ProcessChangeEventRequest),
-                typeof(ResolveCollectionRequest),
+                typeof(ResolveCollectionTypeRequest),
                 typeof(SendNotificationRequest)
             });
 
-            builder.Services.AddTransient<IRequestHandler<ProcessChangeEventRequest, Unit>, ProcessChangeEventHandler>();
-            builder.Services.AddTransient<IRequestHandler<ResolveCollectionRequest, Unit>, ResolveCollectionHandler>();
-            builder.Services.AddTransient<IRequestHandler<SendNotificationRequest, Unit>, SendNotificationHandler>();
-
             builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ErrorHandlingPipelineBehavior<,>));
+
+            builder.Services.AddScoped<
+                IRequestExceptionHandler<ResolveCollectionTypeRequest, Unit, InvalidRequestTypeException>,
+                InvalidRequestTypeExceptionHandler>();
+
+            builder.Services.AddScoped<
+                IRequestExceptionHandler<ResolveCollectionTypeRequest, Unit, MissingRequiredPropertyException>,
+                MissingRequiredPropertyExceptionHandler>();
+
+            builder.Services.AddScoped<
+                IRequestExceptionHandler<ExtractDocumentIdentifierRequest, Unit, PropertyNotFoundInDocumentException>,
+                PropertyNotFoundInDocumentExceptionHandler>();
+
+            builder.Services.AddScoped<
+                IRequestExceptionHandler<ExtractDocumentIdentifierRequest, Unit, InvalidObjectIdException>,
+                InvalidObjectIdExceptionHandler>();
+
+            builder.Services.AddScoped<
+                IRequestExceptionHandler<SendNotificationRequest, Unit, SendNotificationFailedException>,
+                SendNotificationFailedExceptionHandler>();
+
+            builder.Services.AddScoped(typeof(IRequestExceptionHandler<,,>), typeof(GlobalExceptionHandler<,,>));
 
             builder.AddMongoDbTrigger();
 
@@ -50,13 +73,10 @@ namespace MongoDbFunction
             return builder;
         }
 
-        public static IServiceCollection RegisterDocumentHandler<TRequest, THandler>(this IServiceCollection services)
-            where TRequest : ProcessDocumentRequest
-            where THandler : class, IErrorHandlingRequestHanlder<TRequest, Unit>
+        public static IServiceCollection RegisterDocumentHandler<TRequest>(this IServiceCollection services)
+            where TRequest : ExtractDocumentIdentifierRequest
         {
             services.AddMediatR(typeof(TRequest));
-
-            services.AddTransient<IRequestHandler<TRequest, Unit>, THandler>();
 
             return services;
         }

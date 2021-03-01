@@ -1,30 +1,28 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Caching.Memory;
-using MongoDbMonitor.Commands.Common;
 using MongoDbMonitor.Commands.Exceptions;
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDbMonitor.Commands.ResolveCollection
+namespace MongoDbMonitor.Commands.ResolveCollectionType
 {
-    internal class ResolveCollectionHandler : IErrorHandlingRequestHanlder<ResolveCollectionRequest, Unit>
+    internal class ResolveCollectionTypeHandler : IRequestHandler<ResolveCollectionTypeRequest, Unit>
     {
         private const string VALUES_PROPERTY_NAME = "Values";
-        private const string COLLECTION_NAME_PROPERTY_NAME = "CollectionName";
         private const string SEND_METHOD_NAME = "Send";
 
         private readonly IMediator _mediator;
         private readonly IMemoryCache _cache;
 
-        public ResolveCollectionHandler(IMediator mediator, IMemoryCache cache)
+        public ResolveCollectionTypeHandler(IMediator mediator, IMemoryCache cache)
         {
             _mediator = mediator;
             _cache = cache;
         }
 
-        public async Task<Unit> Handle(ResolveCollectionRequest request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(ResolveCollectionTypeRequest request, CancellationToken cancellationToken)
         {
             var key = $"{request.AssemblyName}-{request.HandlerRequestFullQualifiedName}";
 
@@ -47,7 +45,7 @@ namespace MongoDbMonitor.Commands.ResolveCollection
             return Unit.Value;
         }
 
-        private static object CreateInstance(ResolveCollectionRequest request)
+        private static object CreateInstance(ResolveCollectionTypeRequest request)
         {
             var instance = Activator.CreateInstance(request.AssemblyName, request.HandlerRequestFullQualifiedName)?.Unwrap();
 
@@ -62,13 +60,6 @@ namespace MongoDbMonitor.Commands.ResolveCollection
                 throw new MissingRequiredPropertyException(request.HandlerRequestFullQualifiedName, VALUES_PROPERTY_NAME);
 
             valuesProperty.SetValue(instance, request.Values);
-
-            var collectionNameProperty = type.GetProperty(COLLECTION_NAME_PROPERTY_NAME);
-
-            if (collectionNameProperty == null)
-                throw new MissingRequiredPropertyException(request.HandlerRequestFullQualifiedName, COLLECTION_NAME_PROPERTY_NAME);
-
-            collectionNameProperty.SetValue(instance, request.CollectionName);
 
             return instance;
         }
