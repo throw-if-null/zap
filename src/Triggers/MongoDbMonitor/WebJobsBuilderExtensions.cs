@@ -35,12 +35,14 @@ namespace MongoDbFunction
 
             builder.Services.AddLogging(x => x.AddConsole());
 
-            builder.Services.AddMediatR(new[]
-            {
-                typeof(ProcessChangeEventRequest),
-                typeof(ResolveCollectionTypeRequest),
-                typeof(SendNotificationRequest)
-            });
+            builder.Services.AddMediatR(
+                x => x.AsScoped(),
+                new[]
+                {
+                    typeof(ProcessChangeEventRequest),
+                    typeof(ResolveCollectionTypeRequest),
+                    typeof(SendNotificationRequest)
+                });
 
             builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ErrorHandlingPipelineBehavior<,>));
 

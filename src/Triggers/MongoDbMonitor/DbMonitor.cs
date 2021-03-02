@@ -17,7 +17,13 @@ namespace MongoDbMonitor
 
         public Task Start(ChangeStreamDocument<dynamic> document, CancellationToken cancellation)
         {
-            return _mediator.Send(new ProcessChangeEventRequest { Document = document }, cancellation);
+            return _mediator.Send(new ProcessChangeEventRequest
+            {
+                CollectionName = document.CollectionNamespace.CollectionName,
+                OperationType = document.OperationType,
+                Values = document.FullDocument
+            },
+            cancellation);
         }
     }
 }

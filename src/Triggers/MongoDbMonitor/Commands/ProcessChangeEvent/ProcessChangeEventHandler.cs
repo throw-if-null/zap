@@ -24,9 +24,8 @@ namespace MongoDbMonitor.Commands.ProcessChangeEvent
 
         public Task<Unit> Handle(ProcessChangeEventRequest request, CancellationToken cancellationToken)
         {
-            var document = request.Document;
-            var collectionName = document.CollectionNamespace.CollectionName;
-            var operationType = document.OperationType;
+            var collectionName = request.CollectionName;
+            var operationType = request.OperationType;
 
             var collection = _options.First(x => x.Name == collectionName);
             var operations = GetOperations(collection.OperationTypes);
@@ -40,7 +39,7 @@ namespace MongoDbMonitor.Commands.ProcessChangeEvent
                     {
                         AssemblyName = collection.AssemblyName,
                         HandlerRequestFullQualifiedName = collection.HandlerRequestFullQualifiedName,
-                        Values = document.FullDocument as IDictionary<string, object>
+                        Values = request.Values
                     },
                     cancellationToken);
         }

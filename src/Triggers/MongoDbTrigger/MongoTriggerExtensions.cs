@@ -3,9 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDbTrigger.Extensions;
 using MongoDbTrigger.Services;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.ObjectModel;
 
 namespace MongoDbTrigger
 {

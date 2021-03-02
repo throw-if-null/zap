@@ -1,0 +1,36 @@
+{
+  "version": "2.0",
+  "logging": {
+    "applicationInsights": {
+      "samplingExcludedTypes": "Request",
+      "samplingSettings": {
+        "isEnabled": true
+      }
+    }
+  },
+
+  "MongoOptions": {
+    "ConnectionString": "mongodb+srv://testUser:testUser@testcluster.okicx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
+    "Database": "test",
+    "CollectionOptions": [
+      {
+        "Name": "items",
+        "AssemblyName": "MongoDbFunction",
+        "HandlerRequestFullQualifiedName": "MongoDbFunction.Commands.ProcessItem.ProcessItemRequest",
+        "OperationTypes": [ "insert", "update", "replace" ]
+      },
+      {
+        "Name": "things",
+        "AssemblyName": "MongoDbFunction",
+        "HandlerRequestFullQualifiedName": "MongoDbFunction.Commands.ProcessThing.ProcessThingRequest",
+        "OperationTypes": [ "insert", "update", "replace" ]
+      },
+      {
+        "Name": "stuff",
+        "AssemblyName": "MongoDbFunction",
+        "HandlerRequestFullQualifiedName": "MongoDbFunction.Commands.ProcessThing.ProcessStuffRequest",
+        "OperationTypes": [ "insert", "update", "replace" ]
+      }
+    ]
+  }
+}

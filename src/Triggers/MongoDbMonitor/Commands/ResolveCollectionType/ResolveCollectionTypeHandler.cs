@@ -47,10 +47,7 @@ namespace MongoDbMonitor.Commands.ResolveCollectionType
 
         private static object CreateInstance(ResolveCollectionTypeRequest request)
         {
-            var instance = Activator.CreateInstance(request.AssemblyName, request.HandlerRequestFullQualifiedName)?.Unwrap();
-
-            if (instance == null)
-                throw new InvalidRequestTypeException(request.AssemblyName, request.HandlerRequestFullQualifiedName);
+            var instance = CreateRequestInstance(request.AssemblyName, request.HandlerRequestFullQualifiedName);
 
             var type = instance.GetType();
 
@@ -62,6 +59,20 @@ namespace MongoDbMonitor.Commands.ResolveCollectionType
             valuesProperty.SetValue(instance, request.Values);
 
             return instance;
+        }
+
+        private static object CreateRequestInstance(string assemblyName, string requestFullQualifiedName)
+        {
+            try
+            {
+                var instance = Activator.CreateInstance(assemblyName, requestFullQualifiedName)?.Unwrap();
+
+                return instance;
+            }
+            catch(Exception ex)
+            {
+                throw new InvalidRequestTypeException(assemblyName, requestFullQualifiedName, ex);
+            }
         }
     }
 }
