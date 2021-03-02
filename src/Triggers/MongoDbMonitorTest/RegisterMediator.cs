@@ -2,6 +2,12 @@
 using MediatR.Pipeline;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using MongoDbFunction.Commands.ProcessItem;
+using MongoDbFunction.Commands.ProcessThing;
+using MongoDbMonitor.Commands.ProcessChangeEvent;
+using MongoDbMonitor.Commands.ResolveCollectionType;
+using MongoDbMonitor.Commands.SendNotification;
+using MongoDbMonitor.Commands.SendSlackAlert;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +19,14 @@ namespace MongoDbMonitorTest
     {
         public static IServiceCollection AddMediatR(IServiceCollection services, IEnumerable<Type> handlerAssemblyMarkerTypes, MediatRServiceConfiguration configuration, bool useExceptionHandler = false)
         {
-            AddMediatRClasses(services, handlerAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), configuration, useExceptionHandler);
+            //AddMediatRClasses(services, handlerAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), configuration, useExceptionHandler);
+            services.AddTransient<IRequestHandler<ProcessChangeEventRequest, Unit>, ProcessChangeEventHandler>();
+            services.AddTransient<IRequestHandler<SendNotificationRequest, Unit>, SendNotificationHandler>();
+            services.AddTransient<IRequestHandler<SendSlackAlertRequest, Unit>, SendSlackAlertHandler>();
+            services.AddTransient<IRequestHandler<ProcessItemRequest, Unit>, ProcessItemHandler>();
+            services.AddTransient<IRequestHandler<ProcessThingRequest, Unit>, ProcessThingHandler>();
+            services.AddTransient<IRequestHandler<ResolveCollectionTypeRequest, Unit>, ResolveCollectionTypeHandler>();
+
             AddRequiredServices(services, new MediatRServiceConfiguration().AsScoped());
 
             return services;
