@@ -45,27 +45,28 @@ namespace MongoDbMonitorTest
             return services;
         }
 
-        [Fact]
-        public async Task Should_Report()
+        [Theory]
+        [InlineData("items", "_id")]
+        [InlineData("things", "SomeId")]
+        public async Task Should_Report(string collectionName, string propertyNameToExtract)
         {
             using var provider = RegisterService().BuildServiceProvider();
 
             var data = new Dictionary<string, object>
             {
-                ["_id"] = ObjectId.GenerateNewId(),
-                ["name"] = "test",
+                [propertyNameToExtract] = ObjectId.GenerateNewId(),
+                ["text"] = "test",
                 ["elapsed"] = 441
             };
 
             var handler = provider.GetRequiredService<IRequestHandler<ProcessChangeEventRequest, Unit>>();
 
-
             Unit response = await handler.Handle(
                 new ProcessChangeEventRequest
                 {
-                    CollectionName = "items",
-                     OperationType = ChangeStreamOperationType.Replace,
-                     Values = data
+                    CollectionName = collectionName,
+                    OperationType = ChangeStreamOperationType.Replace,
+                    Values = data
                 },
                 CancellationToken.None);
 
@@ -77,13 +78,6 @@ namespace MongoDbMonitorTest
         {
             using var provider = RegisterService().BuildServiceProvider();
 
-            var data = new Dictionary<string, object>
-            {
-                ["_id"] = ObjectId.GenerateNewId(),
-                ["name"] = "test",
-                ["elapsed"] = 441
-            };
-
             var handler = provider.GetRequiredService<IRequestHandler<ProcessChangeEventRequest, Unit>>();
 
 
@@ -92,7 +86,7 @@ namespace MongoDbMonitorTest
                 {
                     CollectionName = "stuff",
                     OperationType = ChangeStreamOperationType.Replace,
-                    Values = data
+                    Values = new Dictionary<string, object>(0)
                 },
                 CancellationToken.None));
         }
