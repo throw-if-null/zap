@@ -2,18 +2,12 @@ using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using MongoDbFunction.Commands.ProcessItem;
 using MongoDbFunction.Commands.ProcessThing;
 using MongoDbMonitor;
 using MongoDbMonitor.Commands.Exceptions;
 using MongoDbMonitor.Commands.ProcessChangeEvent;
-using MongoDbMonitor.Commands.ResolveCollectionType;
-using MongoDbMonitor.Commands.SendNotification;
-using MongoDbMonitor.Commands.SendSlackAlert;
-using Moq;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -38,25 +32,15 @@ namespace MongoDbMonitorTest
 
             services.AddLogging();
 
-            services
-                .AddOptions<Collection<CollectionOptions>>()
-                .Configure<IConfiguration>((settings, cfg) =>
-                {
-                    cfg.Bind("MongoOptions:CollectionOptions", settings);
-                });
+            services.RegisterOptions<Collection<CollectionOptions>>("MongoOptions:CollectionOptions");
 
             services.AddMemoryCache();
 
-            RegisterMediator.AddMediatR(services, new[]
-            {
-                typeof(ProcessChangeEventRequest),
-                typeof(ResolveCollectionTypeRequest),
-                typeof(SendNotificationRequest),
-                typeof(SendSlackAlertRequest),
-                typeof(ProcessItemRequest),
-                typeof(ProcessThingRequest)
-            },
-            new MediatRServiceConfiguration().AsScoped());
+            services.RegisterMediator(ServiceLifetime.Transient);
+
+            services.RegisterMediatorHandlers();
+            services.RegisterExtractDocumentIdentifierHandler<ProcessItemRequest, ProcessItemHandler>();
+            services.RegisterExtractDocumentIdentifierHandler<ProcessThingRequest, ProcessThingHandler>();
 
             return services;
         }

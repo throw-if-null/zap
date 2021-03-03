@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 
 namespace MongoDbMonitor.Commands.Common
 {
-    public class ErrorHandlingPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
+    public class MetricsCapturingPipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     {
         private readonly ILogger _logger;
 
-        public ErrorHandlingPipelineBehavior(ILogger<ErrorHandlingPipelineBehavior<TRequest, TResponse>> logger)
+        public MetricsCapturingPipelineBehavior(ILogger<MetricsCapturingPipelineBehavior<TRequest, TResponse>> logger)
         {
             _logger = logger;
         }
