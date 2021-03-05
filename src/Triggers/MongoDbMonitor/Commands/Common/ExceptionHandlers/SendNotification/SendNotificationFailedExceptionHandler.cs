@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
+using MongoDbMonitor.Commands.Common.Responses;
 using MongoDbMonitor.Commands.Exceptions;
 using MongoDbMonitor.Commands.SendNotification;
 using MongoDbMonitor.Commands.SendSlackAlert;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.SendNotification
 {
     internal class SendNotificationFailedExceptionHandler :
-        IRequestExceptionHandler<SendNotificationRequest, Unit, SendNotificationFailedException>
+        IRequestExceptionHandler<SendNotificationRequest, ProcessingStatusResponse, SendNotificationFailedException>
     {
         private readonly IMediator _mediator;
         private readonly ILogger _logger;
@@ -27,7 +28,7 @@ namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.SendNotification
         public async Task Handle(
             SendNotificationRequest request,
             SendNotificationFailedException exception,
-            RequestExceptionHandlerState<Unit> state,
+            RequestExceptionHandlerState<ProcessingStatusResponse> state,
             CancellationToken cancellationToken)
         {
             _logger.LogError(

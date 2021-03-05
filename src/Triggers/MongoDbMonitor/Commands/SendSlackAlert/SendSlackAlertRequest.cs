@@ -1,9 +1,10 @@
 ﻿using MediatR;
+using MongoDbMonitor.Commands.Common.Responses;
 using System.Collections.Generic;
 
 namespace MongoDbMonitor.Commands.SendSlackAlert
 {
-    public class SendSlackAlertRequest : IRequest
+    public class SendSlackAlertRequest : IRequest<ProcessingStatusResponse>
     {
         public string RequestType { get; set; }
 

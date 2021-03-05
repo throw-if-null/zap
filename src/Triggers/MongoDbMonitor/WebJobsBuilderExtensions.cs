@@ -5,56 +5,129 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
+using MongoDbMonitor.Clients.HttpApi;
+using MongoDbMonitor.Clients.SlackApi;
 using MongoDbMonitor.Commands.Common;
 using MongoDbMonitor.Commands.Common.ExceptionHandlers.ExtractDocumentIdentifier;
 using MongoDbMonitor.Commands.Common.ExceptionHandlers.ResolveCollectionType;
 using MongoDbMonitor.Commands.Common.ExceptionHandlers.SendNotification;
+using MongoDbMonitor.Commands.Common.Responses;
 using MongoDbMonitor.Commands.Exceptions;
 using MongoDbMonitor.Commands.ExtractDocumentIdentifier;
 using MongoDbMonitor.Commands.ProcessChangeEvent;
 using MongoDbMonitor.Commands.ResolveCollectionType;
 using MongoDbMonitor.Commands.SendNotification;
 using MongoDbMonitor.Commands.SendSlackAlert;
+using MongoDbMonitor.CrossCutting.QoS;
 using MongoDbTrigger;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace MongoDbMonitor
 {
-    public static class WebJobsBuilderExtensions
+    public static class WebJobExtensions
     {
-        public static IWebJobsBuilder RegisterMonitor(this IWebJobsBuilder builder)
+        public static IWebJobsBuilder AddMongoDbCollectionMonitor(this IWebJobsBuilder builder)
         {
-            builder.Services.RegisterOptions<Collection<CollectionOptions>>(
-                "AzureFunctionsJobHost:MongoOptions:CollectionOptions");
+            _ = builder ?? throw new ArgumentNullException(nameof(builder));
 
-            builder.Services.AddMemoryCache();
+            RegisterOptions<Collection<CollectionOptions>>(
+                builder.Services,
+                "AzureFunctionsJobHost:MonitorOptions:CollectionOptions");
+
+            RegisterOptions<RetryProviderOptions>(
+                builder.Services,
+                "AzureFunctionsJobHost:MonitorOptions:RetryProviderOptions");
+
+            RegisterOptions<HttpApiClientOptions>(
+                builder.Services,
+                "AzureFunctionsJobHost:MonitorOptions:HttpApiClientOptions");
+
+            RegisterOptions<SlackApiClientOptions>(
+                builder.Services,
+                "AzureFunctionsJobHost:MonitorOptions:SlackApiClientOptions");
 
             builder.Services.AddLogging(x => x.AddConsole());
 
-            builder.Services.RegisterMediator(ServiceLifetime.Scoped);
-            builder.Services.RegisterMediatorExceptionBehviors();
-            builder.Services.RegisterMediatorHandlers();
+            builder.Services.AddMemoryCache();
 
-            builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(MetricsCapturingPipelineBehavior<,>));
+            builder.Services.AddHttpClient<IHttpApiClient, HttpApiClient>();
+            builder.Services.AddHttpClient<ISlackApiClient, SlackApiClient>();
+
+            builder.Services.AddSingleton<IRetryProvider, RetryProvider>();
+
+            builder.Services.AddTransient<MonitorRunner>();
+
+            RegisterRequestHandler<ProcessChangeEventRequest, ProcessChangeEventHandler>(builder.Services);
+            RegisterRequestHandler<ResolveCollectionTypeRequest, ResolveCollectionTypeHandler>(builder.Services);
+            RegisterRequestHandler<SendNotificationRequest, SendNotificationHandler>(builder.Services);
+            RegisterRequestHandler<SendSlackAlertRequest, SendSlackAlertHandler>(builder.Services);
+
+            RegisterMediator(builder.Services, ServiceLifetime.Transient);
+
+            builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(MetricsCapturingPipelineBehavior<,>));
+            RegisterMediatorBehaviors(builder.Services);
+            RegisterMediatorExceptionHandlers(builder.Services);
+
 
             builder.AddMongoDbTrigger();
-
-            builder.Services.AddTransient<DbMonitor>();
 
             return builder;
         }
 
-        internal static IServiceCollection RegisterMediator(this IServiceCollection services, ServiceLifetime lifetime)
+        public static IWebJobsBuilder RegisterProcessDocumentMediatorHandler<TRequest, THandler>(this IWebJobsBuilder builder)
+            where THandler : class, IRequestHandler<TRequest, ProcessingStatusResponse>
+            where TRequest : ExtractDocumentIdentifierRequest, IRequest<ProcessingStatusResponse>
+        {
+            builder.Services.AddTransient<IRequestHandler<TRequest, ProcessingStatusResponse>, THandler>();
+
+            RegisterExtractProcessDocumentExceptionHandlers<TRequest, THandler>(builder.Services);
+
+            return builder;
+        }
+
+        internal static IServiceCollection RegisterExtractProcessDocumentExceptionHandlers<TRequest, THandler>(
+            IServiceCollection services)
+            where THandler : class, IRequestHandler<TRequest, ProcessingStatusResponse>
+            where TRequest : ExtractDocumentIdentifierRequest, IRequest<ProcessingStatusResponse>
+        {
+            services.AddTransient<
+                IRequestExceptionHandler<TRequest, ProcessingStatusResponse, PropertyNotFoundInDocumentException>,
+                PropertyNotFoundInDocumentExceptionHandler<TRequest>>();
+
+            services.AddTransient<
+                IRequestExceptionHandler<TRequest, ProcessingStatusResponse, InvalidObjectIdException>,
+                InvalidObjectIdExceptionHandler<TRequest>>();
+
+            return services;
+        }
+
+        internal static IServiceCollection RegisterOptions<TOption>(IServiceCollection services, string path)
+            where TOption : class
+        {
+            services
+                .AddOptions<TOption>()
+                .Configure<IConfiguration>((settings, configuration) =>
+                {
+                    configuration.Bind(path, settings);
+                });
+
+            return services;
+        }
+
+        internal static IServiceCollection RegisterMediator(IServiceCollection services, ServiceLifetime lifetime)
         {
             services.TryAddTransient<ServiceFactory>(p => p.GetService);
             services.TryAdd(new ServiceDescriptor(typeof(IMediator), typeof(Mediator), lifetime));
             services.TryAdd(new ServiceDescriptor(typeof(ISender), sp => sp.GetService<IMediator>(), lifetime));
             services.TryAdd(new ServiceDescriptor(typeof(IPublisher), sp => sp.GetService<IMediator>(), lifetime));
 
+            return services;
+        }
+
+        internal static IServiceCollection RegisterMediatorBehaviors(IServiceCollection services)
+        {
             // Use TryAddTransientExact (see below), we dó want to register our Pre/Post processor behavior, even if (a more concrete)
             // registration for IPipelineBehavior<,> already exists. But only once.
             TryAddTransientExact(services, typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
@@ -64,72 +137,39 @@ namespace MongoDbMonitor
 
             return services;
 
-            static void TryAddTransientExact(IServiceCollection s, Type serviceType, Type implementationType)
+            static void TryAddTransientExact(IServiceCollection services, Type serviceType, Type implementationType)
             {
-                if (s.Any(reg => reg.ServiceType == serviceType && reg.ImplementationType == implementationType))
+                if (services.Any(reg => reg.ServiceType == serviceType && reg.ImplementationType == implementationType))
                     return;
 
-                s.AddTransient(serviceType, implementationType);
+                services.AddTransient(serviceType, implementationType);
             }
         }
 
-        public static IServiceCollection RegisterExtractDocumentIdentifierHandler<TRequest, THandler>(this IServiceCollection services)
-            where TRequest : ExtractDocumentIdentifierRequest
-            where THandler : class, IRequestHandler<TRequest, Unit>
+        internal static IServiceCollection RegisterRequestHandler<TRequest, THandler>(IServiceCollection services)
+            where TRequest : IRequest<ProcessingStatusResponse>
+            where THandler : class, IRequestHandler<TRequest, ProcessingStatusResponse>
         {
-            services.AddTransient<IRequestHandler<TRequest, Unit>, THandler>();
+            services.AddTransient<IRequestHandler<TRequest, ProcessingStatusResponse>, THandler>();
 
             return services;
         }
 
-        internal static void RegisterOptions<TOptions>(
-            this IServiceCollection services,
-            string path)
-            where TOptions : class, new()
+        internal static IServiceCollection RegisterMediatorExceptionHandlers(IServiceCollection services)
         {
-            var key = path;
-
-            services
-                .AddOptions<TOptions>()
-                .Configure<IConfiguration>((settings, configuration) =>
-                {
-                    configuration.Bind(key, settings);
-                });
-        }
-
-        internal static IServiceCollection RegisterMediatorExceptionBehviors(this IServiceCollection services)
-        {
-            services.AddScoped<
-                IRequestExceptionHandler<ResolveCollectionTypeRequest, Unit, InvalidRequestTypeException>,
+            services.AddTransient<
+                IRequestExceptionHandler<ResolveCollectionTypeRequest, ProcessingStatusResponse, InvalidRequestTypeException>,
                 InvalidRequestTypeExceptionHandler>();
 
-            services.AddScoped<
-                IRequestExceptionHandler<ResolveCollectionTypeRequest, Unit, MissingRequiredPropertyException>,
+            services.AddTransient<
+                IRequestExceptionHandler<ResolveCollectionTypeRequest, ProcessingStatusResponse, MissingRequiredPropertyException>,
                 MissingRequiredPropertyExceptionHandler>();
 
-            services.AddScoped<
-                IRequestExceptionHandler<ExtractDocumentIdentifierRequest, Unit, PropertyNotFoundInDocumentException>,
-                PropertyNotFoundInDocumentExceptionHandler>();
-
-            services.AddScoped<
-                IRequestExceptionHandler<ExtractDocumentIdentifierRequest, Unit, InvalidObjectIdException>,
-                InvalidObjectIdExceptionHandler>();
-
-            services.AddScoped<
-                IRequestExceptionHandler<SendNotificationRequest, Unit, SendNotificationFailedException>,
+            services.AddTransient<
+                IRequestExceptionHandler<SendNotificationRequest, ProcessingStatusResponse, SendNotificationFailedException>,
                 SendNotificationFailedExceptionHandler>();
 
-            services.AddScoped(typeof(IRequestExceptionHandler<,,>), typeof(GlobalExceptionHandler<,,>));
-
-            return services;
-        }
-
-        internal static IServiceCollection RegisterMediatorHandlers(this IServiceCollection services)
-        {
-            services.AddTransient<IRequestHandler<ProcessChangeEventRequest, Unit>, ProcessChangeEventHandler>();
-            services.AddTransient<IRequestHandler<ResolveCollectionTypeRequest, Unit>, ResolveCollectionTypeHandler>();
-            services.AddTransient<IRequestHandler<SendNotificationRequest, Unit>, SendNotificationHandler>();
-            services.AddTransient<IRequestHandler<SendSlackAlertRequest, Unit>, SendSlackAlertHandler>();
+            services.AddTransient(typeof(IRequestExceptionHandler<,,>), typeof(GlobalExceptionHandler<,,>));
 
             return services;
         }

@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using MongoDbMonitor.Commands.Common.Responses;
 using MongoDbMonitor.Commands.ResolveCollectionType;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace MongoDbMonitor.Commands.ProcessChangeEvent
 {
-    internal class ProcessChangeEventHandler : IRequestHandler<ProcessChangeEventRequest, Unit>
+    internal class ProcessChangeEventHandler : IRequestHandler<ProcessChangeEventRequest, ProcessingStatusResponse>
     {
         private readonly Collection<CollectionOptions> _options;
         private readonly IMediator _mediator;
@@ -22,33 +23,46 @@ namespace MongoDbMonitor.Commands.ProcessChangeEvent
             _mediator = mediator;
         }
 
-        public Task<Unit> Handle(ProcessChangeEventRequest request, CancellationToken cancellationToken)
+        public async Task<ProcessingStatusResponse> Handle(ProcessChangeEventRequest request, CancellationToken cancellationToken)
         {
-            var collectionName = request.CollectionName;
-            var operationType = request.OperationType;
+            var collection =
+                _options.First(
+                    x =>
+                        x.Name.Equals(
+                            request.CollectionName,
+                            StringComparison.InvariantCultureIgnoreCase));
 
-            var collection = _options.First(x => x.Name == collectionName);
             var operations = GetOperations(collection.OperationTypes);
 
-            if (operations.All(x => x != operationType))
-                return Unit.Task;
+            if (!operations.Any(x => x.Equals(request.OperationName, StringComparison.InvariantCultureIgnoreCase)))
+                return new ProcessingStatusResponse { FinalStep = ProcessingStep.ProcessChangeEvent };
 
-            return
-                _mediator.Send(
-                    new ResolveCollectionTypeRequest
-                    {
-                        AssemblyName = collection.AssemblyName,
-                        HandlerRequestFullQualifiedName = collection.HandlerRequestFullQualifiedName,
-                        Values = request.Values
-                    },
-                    cancellationToken);
+            var (assemblyName, requestName) = GetRequestName(_options, request.CollectionName);
+
+            var response = await _mediator.Send(
+                new ResolveCollectionTypeRequest
+                {
+                    AssemblyName = assemblyName,
+                    HandlerRequestFullQualifiedName = requestName,
+                    Values = request.Values
+                },
+                cancellationToken);
+
+            return response;
         }
 
-        private static IEnumerable<ChangeStreamOperationType> GetOperations(IEnumerable<string> operationNames)
+        private static (string assemblyName, string requestName) GetRequestName(Collection<CollectionOptions> collections, string collectionName)
         {
-            var operationTypes = new List<ChangeStreamOperationType>();
+            var collection =
+                collections
+                    .First(x => x.Name.Equals(collectionName, StringComparison.InvariantCultureIgnoreCase));
 
-            return operationNames.Select(name => Enum.Parse<ChangeStreamOperationType>(name, true));
+            return (collection.AssemblyName, collection.HandlerRequestFullQualifiedName);
+        }
+
+        private static IEnumerable<string> GetOperations(IEnumerable<string> operationNames)
+        {
+            return operationNames.Select(name => name.ToLowerInvariant());
         }
     }
 }

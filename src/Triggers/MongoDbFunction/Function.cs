@@ -1,5 +1,4 @@
-﻿using MediatR;
-using Microsoft.Azure.WebJobs;
+﻿using Microsoft.Azure.WebJobs;
 using MongoDB.Driver;
 using MongoDbMonitor;
 using MongoDbTrigger.Triggers;
@@ -11,19 +10,22 @@ namespace MongoDbFunction
     // https://github.com/Azure/azure-functions-core-tools/issues/2294 - blocks upgrade to .net 5
     public class Function
     {
-        private readonly CancellationTokenSource _cancellationSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
+        private readonly MonitorRunner _runner;
 
-        private readonly DbMonitor _monitor;
-
-        public Function(DbMonitor monitor)
+        public Function(MonitorRunner runner)
         {
-            _monitor = monitor;
+            _runner = runner;
         }
 
         [FunctionName("TestDbMongoFunction")]
-        public Task Run([MongoDbTrigger] ChangeStreamDocument<dynamic> document)
+        public async Task Run([MongoDbTrigger] ChangeStreamDocument<dynamic> document)
         {
-            return _monitor.Start(document, _cancellationSource.Token);
+            await _runner.Run(
+                document.CollectionNamespace.CollectionName,
+                document.OperationType.ToString(),
+                document.FullDocument,
+                _tokenSource.Token);
         }
     }
 }

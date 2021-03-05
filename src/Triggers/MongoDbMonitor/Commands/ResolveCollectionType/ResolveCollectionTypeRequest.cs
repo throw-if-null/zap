@@ -1,9 +1,10 @@
 ﻿using MediatR;
+using MongoDbMonitor.Commands.Common.Responses;
 using System.Collections.Generic;
 
 namespace MongoDbMonitor.Commands.ResolveCollectionType
 {
-    internal class ResolveCollectionTypeRequest : IRequest
+    internal class ResolveCollectionTypeRequest : IRequest<ProcessingStatusResponse>
     {
         public string AssemblyName { get; internal set; }
 

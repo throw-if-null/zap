@@ -1,9 +1,10 @@
 ﻿using MediatR;
 using MongoDB.Bson;
+using MongoDbMonitor.Commands.Common.Responses;
 
 namespace MongoDbMonitor.Commands.SendNotification
 {
-    internal class SendNotificationRequest : IRequest
+    internal class SendNotificationRequest : IRequest<ProcessingStatusResponse>
     {
         public string CollectionName { get; set; }
 

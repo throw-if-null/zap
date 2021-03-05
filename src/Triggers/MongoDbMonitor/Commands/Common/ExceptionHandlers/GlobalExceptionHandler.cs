@@ -6,8 +6,10 @@ using System.Threading.Tasks;
 
 namespace MongoDbMonitor.Commands.Common
 {
-    public class GlobalExceptionHandler<TRequest, TResponse, TException> : IRequestExceptionHandler<TRequest, TResponse, TException>
+    public class GlobalExceptionHandler<TRequest, TResponse, TException> :
+        IRequestExceptionHandler<TRequest, TResponse, TException>
         where TException : Exception
+        where TResponse : new()
     {
         private readonly ILogger _logger;
 
@@ -24,7 +26,7 @@ namespace MongoDbMonitor.Commands.Common
         {
             _logger.LogCritical(exception, exception.Message);
 
-            state.SetHandled(default);
+            state.SetHandled(new TResponse());
 
             return Task.CompletedTask;
         }

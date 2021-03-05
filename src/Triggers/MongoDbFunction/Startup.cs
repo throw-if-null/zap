@@ -12,10 +12,10 @@ namespace MongoDbFunction
     {
         public void Configure(IWebJobsBuilder builder)
         {
-            builder.Services.RegisterExtractDocumentIdentifierHandler<ProcessItemRequest, ProcessItemHandler>();
-            builder.Services.RegisterExtractDocumentIdentifierHandler<ProcessThingRequest, ProcessThingHandler>();
+            builder.RegisterProcessDocumentMediatorHandler<ProcessItemRequest, ProcessItemHandler>();
+            builder.RegisterProcessDocumentMediatorHandler<ProcessThingRequest, ProcessThingHandler>();
 
-            builder.RegisterMonitor();
+            builder.AddMongoDbCollectionMonitor();
         }
     }
 }

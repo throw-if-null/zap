@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Caching.Memory;
+using MongoDbMonitor.Commands.Common.Responses;
 using MongoDbMonitor.Commands.Exceptions;
 using System;
 using System.Linq;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MongoDbMonitor.Commands.ResolveCollectionType
 {
-    internal class ResolveCollectionTypeHandler : IRequestHandler<ResolveCollectionTypeRequest, Unit>
+    internal class ResolveCollectionTypeHandler : IRequestHandler<ResolveCollectionTypeRequest, ProcessingStatusResponse>
     {
         private const string VALUES_PROPERTY_NAME = "Values";
         private const string SEND_METHOD_NAME = "Send";
@@ -22,27 +23,27 @@ namespace MongoDbMonitor.Commands.ResolveCollectionType
             _cache = cache;
         }
 
-        public async Task<Unit> Handle(ResolveCollectionTypeRequest request, CancellationToken cancellationToken)
+        public async Task<ProcessingStatusResponse> Handle(ResolveCollectionTypeRequest request, CancellationToken cancellationToken)
         {
             var key = $"{request.AssemblyName}-{request.HandlerRequestFullQualifiedName}";
 
             object instance = _cache.Get(key);
 
-            if (instance == null)
-                instance = _cache.Set(key, CreateInstance(request));
+            instance ??= _cache.Set(key, CreateInstance(request));
 
-            dynamic method =
+            var method =
                 typeof(ISender)
                     .GetMethods()
                     .First(
                         x =>
                             x.Name == SEND_METHOD_NAME &&
-                            x.IsGenericMethod == false &&
-                            x.ReturnType == typeof(Task<object>));
+                            x.IsGenericMethod);
 
-            _ = await method.Invoke(_mediator, new[] { instance, cancellationToken });
+            dynamic send = method.MakeGenericMethod(typeof(ProcessingStatusResponse));
 
-            return Unit.Value;
+            ProcessingStatusResponse response = await send.Invoke(_mediator, new[] { instance, cancellationToken });
+
+            return response;
         }
 
         private static object CreateInstance(ResolveCollectionTypeRequest request)

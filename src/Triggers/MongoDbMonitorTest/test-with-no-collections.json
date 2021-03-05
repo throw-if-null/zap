@@ -12,20 +12,7 @@
   "MonitorOptions": {
     "ConnectionString": "mongodb+srv://testUser:testUser@testcluster.okicx.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
     "Database": "test",
-    "CollectionOptions": [
-      {
-        "Name": "items",
-        "AssemblyName": "MongoDbFunction",
-        "HandlerRequestFullQualifiedName": "MongoDbFunction.Commands.ProcessItem.ProcessItemRequest",
-        "OperationTypes": [ "insert", "update", "replace" ]
-      },
-      {
-        "Name": "things",
-        "AssemblyName": "MongoDbFunction",
-        "HandlerRequestFullQualifiedName": "MongoDbFunction.Commands.ProcessThing.ProcessThingRequest",
-        "OperationTypes": [ "insert", "update", "replace" ]
-      }
-    ],
+    "CollectionOptions": [],
 
     "RetryProviderOptions": {
       "JitterMaximum": 100,

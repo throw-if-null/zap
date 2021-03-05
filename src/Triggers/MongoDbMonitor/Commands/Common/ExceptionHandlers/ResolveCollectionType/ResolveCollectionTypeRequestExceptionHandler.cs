@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
+using MongoDbMonitor.Commands.Common.Responses;
 using MongoDbMonitor.Commands.ResolveCollectionType;
 using MongoDbMonitor.Commands.SendSlackAlert;
 using System;
@@ -11,7 +12,7 @@ using System.Threading.Tasks;
 namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.ResolveCollectionType
 {
     internal abstract class ResolveCollectionTypeRequestExceptionHandler<TException> :
-        IRequestExceptionHandler<ResolveCollectionTypeRequest, Unit, TException>
+        IRequestExceptionHandler<ResolveCollectionTypeRequest, ProcessingStatusResponse, TException>
         where TException : Exception
     {
         private readonly IMediator _mediator;
@@ -28,7 +29,7 @@ namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.ResolveCollectionType
         public async Task Handle(
             ResolveCollectionTypeRequest request,
             TException exception,
-            RequestExceptionHandlerState<Unit> state,
+            RequestExceptionHandlerState<ProcessingStatusResponse> state,
             CancellationToken cancellationToken)
         {
             _logger.LogError(exception, exception.Message);
@@ -48,7 +49,7 @@ namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.ResolveCollectionType
                     },
                     cancellationToken);
 
-            state.SetHandled(response);
+            state.SetHandled(new ProcessingStatusResponse { FinalStep = ProcessingStep.ResolveCollectionType });
         }
     }
 }
