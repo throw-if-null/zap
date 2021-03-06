@@ -20,7 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Source", "Source", "{93D107
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{4AEB8AB0-35EE-404C-B20D-7A1F18D23DC0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MongoDbMonitorTest", "MongoDbMonitorTest\MongoDbMonitorTest.csproj", "{2035335F-4BF4-43DE-A9D6-3566FF7EDB42}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MongoDbMonitorTest", "MongoDbMonitorTest\MongoDbMonitorTest.csproj", "{2035335F-4BF4-43DE-A9D6-3566FF7EDB42}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
