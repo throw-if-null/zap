@@ -49,7 +49,9 @@ namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.ResolveCollectionType
                     },
                     cancellationToken);
 
-            state.SetHandled(new ProcessingStatusResponse { FinalStep = ProcessingStep.ResolveCollectionType });
+            response.FinalStep = ProcessingStep.ResolveCollectionType;
+
+            state.SetHandled(response);
         }
     }
 }

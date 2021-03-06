@@ -35,22 +35,25 @@ namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.ExtractDocumentIdenti
         {
             _logger.LogError(exception, exception.Message);
 
-            _ = await
-                _mediator.Send(
-                    new SendSlackAlertRequest
-                    {
-                        RequestType = request.GetType().FullName,
-                        FailureReason = exception.Message,
-                        RequestData = new Dictionary<string, object>
+            var response =
+                await
+                    _mediator.Send(
+                        new SendSlackAlertRequest
                         {
-                            [nameof(request.CollectionName)] = request.CollectionName,
-                            [nameof(request.PropertyToExtract)] = request.PropertyToExtract,
-                            [nameof(request.Values)] = request.Values
-                        }
-                    },
-                    cancellationToken);
+                            RequestType = request.GetType().FullName,
+                            FailureReason = exception.Message,
+                            RequestData = new Dictionary<string, object>
+                            {
+                                [nameof(request.CollectionName)] = request.CollectionName,
+                                [nameof(request.PropertyToExtract)] = request.PropertyToExtract,
+                                [nameof(request.Values)] = request.Values
+                            }
+                        },
+                        cancellationToken);
 
-            state.SetHandled(new ProcessingStatusResponse { FinalStep = ProcessingStep.ExtractDocumentIdentifier });
+            response.FinalStep = ProcessingStep.ExtractDocumentIdentifier;
+
+            state.SetHandled(response);
         }
-    }
+}
 }

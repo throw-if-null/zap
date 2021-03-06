@@ -47,10 +47,5 @@ namespace MongoDbTrigger
 
             return builder;
         }
-
-        internal class CollectionInfo
-        {
-            public string Name { get; set; }
-        }
     }
 }

@@ -82,14 +82,13 @@ namespace MongoDbMonitor
         {
             builder.Services.AddTransient<IRequestHandler<TRequest, ProcessingStatusResponse>, THandler>();
 
-            RegisterExtractProcessDocumentExceptionHandlers<TRequest, THandler>(builder.Services);
+            RegisterExtractProcessDocumentExceptionHandlers<TRequest>(builder.Services);
 
             return builder;
         }
 
-        internal static IServiceCollection RegisterExtractProcessDocumentExceptionHandlers<TRequest, THandler>(
+        internal static IServiceCollection RegisterExtractProcessDocumentExceptionHandlers<TRequest>(
             IServiceCollection services)
-            where THandler : class, IRequestHandler<TRequest, ProcessingStatusResponse>
             where TRequest : ExtractDocumentIdentifierRequest, IRequest<ProcessingStatusResponse>
         {
             services.AddTransient<

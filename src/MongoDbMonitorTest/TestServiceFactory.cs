@@ -98,8 +98,9 @@ namespace MongoDbMonitorTest
 
             if (includeExceptionHandler)
             {
-                RegisterExtractProcessDocumentExceptionHandlers<ProcessItemRequest, ProcessItemHandler>(services);
-                RegisterExtractProcessDocumentExceptionHandlers<ProcessThingRequest, ProcessThingHandler>(services);
+                RegisterExtractProcessDocumentExceptionHandlers<ProcessItemRequest>(services);
+                RegisterExtractProcessDocumentExceptionHandlers<ProcessThingRequest>(services);
+
                 RegisterMediatorExceptionHandlers(services);
             }
 
