@@ -2,7 +2,7 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - branch-zero
   pull_request:
     types: [opened, synchronize, reopened]
 jobs:
@@ -42,6 +42,10 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"MirzaMerdovic_zap" /o:"mimme" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          dotnet tool install --global coverlet.console
+          dotnet add package coverlet.msbuild
+          dotnet test src/MongoDbMonitorTest/MongoDbMonitorTest.csproj /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=coverage
+          dotnet build-server shutdown
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"MirzaMerdovic_zap" /o:"mimme" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPath="src\MongoDbMonitorTest\coverage.opencover.xml" /d:sonar.coverage.exclusions="**Test*.cs"
           dotnet build .\src\Monitor.sln
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
