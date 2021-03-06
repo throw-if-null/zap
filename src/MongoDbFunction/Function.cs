@@ -2,12 +2,14 @@
 using MongoDB.Driver;
 using MongoDbMonitor;
 using MongoDbTrigger.Triggers;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace MongoDbFunction
 {
     // https://github.com/Azure/azure-functions-core-tools/issues/2294 - blocks upgrade to .net 5
+    [ExcludeFromCodeCoverage]
     public class Function
     {
         private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();

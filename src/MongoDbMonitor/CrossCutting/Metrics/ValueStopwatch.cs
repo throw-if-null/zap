@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MongoDbMonitor.CrossCutting
 {
+    [ExcludeFromCodeCoverage]
     public readonly struct ValueStopwatch
     {
         private static readonly double TimestampToTicks = TimeSpan.TicksPerSecond / (double)Stopwatch.Frequency;
