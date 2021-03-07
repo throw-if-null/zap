@@ -1,3 +1,4 @@
 # azure-triggers
-
-[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-black.svg)](https://sonarcloud.io/dashboard?id=MirzaMerdovic_zap)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=MirzaMerdovic_zap&metric=ncloc)](https://sonarcloud.io/dashboard?id=MirzaMerdovic_zap)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=MirzaMerdovic_zap&metric=coverage)](https://sonarcloud.io/dashboard?id=MirzaMerdovic_zap)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=MirzaMerdovic_zap&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=MirzaMerdovic_zap)
