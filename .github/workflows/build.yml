@@ -43,5 +43,7 @@ jobs:
         shell: powershell
         run: |
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"MirzaMerdovic_zap" /o:"mimme" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPath="src\MongoDbMonitorTest\TestResults\*\coverage.opencover.xml" /d:sonar.coverage.exclusions="**Test*.cs"
+          dotnet build .\src\Monitor.sln
+          dotnet build-server shutdown
           dotnet test --collect:"XPlat Code Coverage" --settings MongoDbMonitorTest\runsettings.xml
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
