@@ -30,7 +30,14 @@ namespace Cake.CI.Tasks
                     //["sonar.login"] = "d864617b60288b7232fd9f821d959b63e7752b37"
                     ["sonar.host.url"] = "https://sonarcloud.io",
                     ["sonar.sources"] = sourcesDirectory.Path.FullPath,
-                    ["sonar.projectBaseDir"] = ".."
+                    ["sonar.projectBaseDir"] = "..",
+                    ["sonar.organization"] = "mimme",
+                    ["sonar.projectKey"] = "MirzaMerdovic_zap",
+                    ["sonar.projectName"] = "zap",
+
+                    ["sonar.inclusions"] = "**/*.cs",
+                    ["sonar.cs.opencover.reportsPaths"] = "reports/*/coverage.opencover.xml",
+                    ["sonar.coverage.exclusions"] = "**Test*.cs"
                 }
             };
 
