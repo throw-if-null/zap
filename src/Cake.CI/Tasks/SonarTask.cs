@@ -29,9 +29,12 @@ namespace Cake.CI.Tasks
                     ["sonar.login"] = "e11403c2cfe7b3ac9bd38c14f3befc3e47688076",
                     //["sonar.login"] = "d864617b60288b7232fd9f821d959b63e7752b37"
                     ["sonar.host.url"] = "https://sonarcloud.io",
-                    ["sonar.sources"] = sourcesDirectory.Path.FullPath
+                    ["sonar.sources"] = sourcesDirectory.Path.FullPath,
+                    ["sonar.projectBaseDir"] = ".."
                 }
             };
+
+            context.Log.Information($"Working directory: {settings.WorkingDirectory.FullPath}");
 
             context.SonarScanner(settings);
         }
