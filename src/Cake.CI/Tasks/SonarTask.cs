@@ -13,7 +13,7 @@ namespace Cake.CI.Tasks
         {
             context.Log.Information($"Working directory: {context.Environment.WorkingDirectory.FullPath}");
 
-            var reportsExist = context.FileSystem.GetDirectory(context.Environment.WorkingDirectory.Combine("reports"));
+            var reportsExist = context.FileSystem.GetDirectory(context.Environment.WorkingDirectory.Combine("reports")).Exists;
             context.Log.Information($"Reports directory exists: {reportsExist}");
 
             var sourcesDirectory = context.FileSystem.GetDirectory(context.Environment.WorkingDirectory.FullPath.Remove(context.Environment.WorkingDirectory.FullPath.LastIndexOf('/')));
@@ -33,8 +33,6 @@ namespace Cake.CI.Tasks
                     ["sonar.projectBaseDir"] = ".."
                 }
             };
-
-            context.Log.Information($"Working directory: {settings.WorkingDirectory.FullPath}");
 
             context.SonarScanner(settings);
         }
