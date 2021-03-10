@@ -21,7 +21,7 @@ namespace Cake.CI.Tasks
             {
                 Properties = new Dictionary<string, string>
                 {
-                    ["sonar.login"] = "2ab9d8d0e8fde1b29cec17186a3e8c4df76e1cd6" //context.Environment.GetEnvironmentVariable("sonar_scanner_token")
+                    ["sonar.login"] = "e11403c2cfe7b3ac9bd38c14f3befc3e47688076" //context.Environment.GetEnvironmentVariable("sonar_scanner_token")
                     //["sonar.login"] = "d864617b60288b7232fd9f821d959b63e7752b37"
                 }
             };
