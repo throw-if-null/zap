@@ -19,10 +19,13 @@ namespace Cake.CI.Tasks
 
             var settings = new SonarScannerSettings
             {
+                Debug = true,
                 Properties = new Dictionary<string, string>
                 {
-                    ["sonar.login"] = "e11403c2cfe7b3ac9bd38c14f3befc3e47688076" //context.Environment.GetEnvironmentVariable("sonar_scanner_token")
+                    //context.Environment.GetEnvironmentVariable("sonar_scanner_token")
+                    ["sonar.login"] = "e11403c2cfe7b3ac9bd38c14f3befc3e47688076",
                     //["sonar.login"] = "d864617b60288b7232fd9f821d959b63e7752b37"
+                    ["sonar.host.url"] = "https://sonarcloud.io"
                 }
             };
 
