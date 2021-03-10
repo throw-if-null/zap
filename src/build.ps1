@@ -13,5 +13,6 @@ dotnet tool install --global Cake.Tool --version 1.1.0
 #dotnet tool restore
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-dotnet cake @args
+dotnet run --project ./Cake.CI/Cake.CI.csproj -- "$@"
+#dotnet cake @args
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
