@@ -21,8 +21,8 @@ namespace Cake.CI.Tasks
                 CoverletOutputFormat = CoverletOutputFormat.opencover,
                 CoverletOutputDirectory = context.Environment.WorkingDirectory.Combine(new DirectoryPath("reports")),
                 CoverletOutputName = "coverage",
-                Verbosity = DotNetCoreVerbosity.Diagnostic,
-                DiagnosticOutput = true,
+                Verbosity = DotNetCoreVerbosity.Normal,
+                DiagnosticOutput = true
             };
 
             context.DotNetCoreTest(
@@ -33,8 +33,9 @@ namespace Cake.CI.Tasks
                     Configuration = context.MsBuildConfiguration,
                     ResultsDirectory = context.Environment.WorkingDirectory.Combine(new DirectoryPath("reports")),
                     NoBuild = true,
-                    DiagnosticOutput = true,
-                    Verbosity = DotNetCoreVerbosity.Normal
+                    DiagnosticOutput = false,
+                    Verbosity = DotNetCoreVerbosity.Normal,
+                    NoRestore = true
                 },
                 coverletSettings);
         }
