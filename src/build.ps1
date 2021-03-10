@@ -10,7 +10,7 @@ $env:DOTNET_NOLOGO = '1'
 
 dotnet tool install --global Cake.Tool --version 1.1.0
 
-dotnet tool restore
+#dotnet tool restore
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 dotnet cake @args
