@@ -1,6 +1,5 @@
 $ErrorActionPreference = 'Stop'
 
-#dotnet tool install --global dotnet-sonarscanner --version 5.1.0
 choco install sonarqube-scanner.portable
 
 Set-Location -LiteralPath $PSScriptRoot
