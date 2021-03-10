@@ -11,7 +11,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Build Project
-        run: ./src/build.ps1
+        run: .\src\build.ps1
         shell: powershell
 
       #- name: Set up JDK 11
