@@ -24,7 +24,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MongoDbMonitorTest", "Mongo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".ci", ".ci", "{A29BA45E-9E1F-479D-B9E0-67284F98C2D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cake.CI", "Cake.CI\Cake.CI.csproj", "{CEA55A37-323C-4055-BE31-0041BB37EB3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cake.CI", "Cake.CI\Cake.CI.csproj", "{CEA55A37-323C-4055-BE31-0041BB37EB3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

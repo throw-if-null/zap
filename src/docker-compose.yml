@@ -14,7 +14,7 @@ services:
     container_name: portainer
     command: -p :80
     ports:
-      - "9000:80"
+      - "9900:80"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - portainer_data:/data
@@ -27,6 +27,15 @@ services:
     ports:
       - "10000:10000"
       - "10001:10001"
+
+  sonar:
+    <<: *base-service-template
+    image: sonarqube:latest
+    container_name: sonar
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    ports:
+      - "9000:9000"
 
   mongo1:
     <<: *base-service-template

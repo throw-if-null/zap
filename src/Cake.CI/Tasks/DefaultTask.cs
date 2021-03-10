@@ -2,7 +2,7 @@
 
 namespace Cake.CI.Tasks
 {
-    [IsDependentOn(typeof(TestTask))]
+    [IsDependentOn(typeof(SonarTask))]
     public sealed class Default : FrostingTask
     {
     }

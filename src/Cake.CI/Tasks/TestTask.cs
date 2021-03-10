@@ -1,9 +1,9 @@
 ﻿using Cake.Common.Tools.DotNetCore;
 using Cake.Common.Tools.DotNetCore.Test;
+using Cake.Core.Diagnostics;
 using Cake.Core.IO;
 using Cake.Coverlet;
 using Cake.Frosting;
-using System;
 
 namespace Cake.CI.Tasks
 {
@@ -13,21 +13,25 @@ namespace Cake.CI.Tasks
     {
         public override void Run(BuildContext context)
         {
+            context.Log.Information($"Working directory: {context.Environment.WorkingDirectory.FullPath}");
+
             var coverletSettings = new CoverletSettings
             {
                 CollectCoverage = true,
                 CoverletOutputFormat = CoverletOutputFormat.opencover,
                 CoverletOutputDirectory = context.Environment.WorkingDirectory.Combine(new DirectoryPath("reports")),
-                CoverletOutputName = $"results-{DateTime.UtcNow:dd-MM-yyyy-HH-mm-ss-FFF}",
+                CoverletOutputName = "coverage",
                 Verbosity = DotNetCoreVerbosity.Diagnostic,
-                DiagnosticOutput = true
+                DiagnosticOutput = true,
             };
 
             context.DotNetCoreTest(
                 "../Monitor.sln",
                 new DotNetCoreTestSettings
                 {
+                    Settings = "./../MongoDbMonitorTest/runsettings.xml",
                     Configuration = context.MsBuildConfiguration,
+                    ResultsDirectory = context.Environment.WorkingDirectory.Combine(new DirectoryPath("reports")),
                     NoBuild = true,
                     DiagnosticOutput = true,
                     Verbosity = DotNetCoreVerbosity.Normal

@@ -350,3 +350,4 @@ MigrationBackup/
 .ionide/
 /src/Cake.CI/reports
 /src/build.ps1
+/src/Cake.CI/.scannerwork
