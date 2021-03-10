@@ -15,7 +15,7 @@ namespace Cake.CI.Tasks
 
             var reportsExist = context.FileSystem.GetDirectory(context.Environment.WorkingDirectory.Combine("reports"));
             context.Log.Information($"Reportes directory exists: {reportsExist}");
-
+            context.Log.Information($"Source directory: {context.Environment.WorkingDirectory.FullPath.Remove(context.Environment.WorkingDirectory.FullPath.LastIndexOf('/'))}");
 
             var settings = new SonarScannerSettings
             {
@@ -25,7 +25,8 @@ namespace Cake.CI.Tasks
                     //context.Environment.GetEnvironmentVariable("sonar_scanner_token")
                     ["sonar.login"] = "e11403c2cfe7b3ac9bd38c14f3befc3e47688076",
                     //["sonar.login"] = "d864617b60288b7232fd9f821d959b63e7752b37"
-                    ["sonar.host.url"] = "https://sonarcloud.io"
+                    ["sonar.host.url"] = "https://sonarcloud.io",
+                    ["sonar.sources"] = context.Environment.WorkingDirectory.FullPath.Remove(context.Environment.WorkingDirectory.FullPath.LastIndexOf('/'))
                 }
             };
 
