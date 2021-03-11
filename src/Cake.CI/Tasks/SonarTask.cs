@@ -25,7 +25,7 @@ namespace Cake.CI.Tasks
                 Debug = true,
                 Properties = new Dictionary<string, string>
                 {
-                    ["sonar.login"] = context.Environment.GetEnvironmentVariable("SONAR_TOKEN"), //"e11403c2cfe7b3ac9bd38c14f3befc3e47688076",
+                    ["sonar.login"] = context.Environment.GetEnvironmentVariable("SONAR_TOKEN"),
                     ["sonar.host.url"] = "https://sonarcloud.io",
                     ["sonar.sources"] = sourcesDirectory.Path.FullPath,
                     ["sonar.projectBaseDir"] = "..",
@@ -34,6 +34,7 @@ namespace Cake.CI.Tasks
                     ["sonar.projectName"] = "zap",
 
                     ["sonar.inclusions"] = "**/*.cs",
+                    ["sonar.exclusions"] = "**/bin/*, **/obj/*",
                     ["sonar.cs.opencover.reportsPaths"] = "reports/*/coverage.opencover.xml",
                     ["sonar.coverage.exclusions"] = "**Test*.cs"
                 }
