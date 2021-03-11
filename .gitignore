@@ -349,5 +349,5 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 /src/Cake.CI/reports
-/src/build.ps1
 /src/Cake.CI/.scannerwork
+/src/.scannerwork

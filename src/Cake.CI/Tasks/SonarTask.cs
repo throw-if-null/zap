@@ -37,9 +37,10 @@ namespace Cake.CI.Tasks
                     ["sonar.links.issue"] = "https://github.com/MirzaMerdovic/zap/issues",
                     ["sonar.links.scm="] = "https://github.com/MirzaMerdovic/zap",
 
-                    ["sonar.inclusions"] = "**/*.cs",
+                    //["sonar.inclusions"] = "**/*.cs",
+                    ["sonar.exclusions"] = "**\\bin\\**\\*.cs, **\\obj\\**\\*.cs",
                     ["sonar.cs.opencover.reportsPaths"] = "reports/*/coverage.opencover.xml",
-                    ["sonar.coverage.exclusions"] = @"**Test*.cs, **\bin\**\*.*, **\obj\**\*.*"
+                    ["sonar.coverage.exclusions"] = @"**Test*.cs"
                 }
             };
 
