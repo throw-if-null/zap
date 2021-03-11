@@ -34,9 +34,8 @@ namespace Cake.CI.Tasks
                     ["sonar.projectName"] = "zap",
 
                     ["sonar.inclusions"] = "**/*.cs",
-                    ["sonar.exclusions"] = "**/bin/*, **/obj/*",
                     ["sonar.cs.opencover.reportsPaths"] = "reports/*/coverage.opencover.xml",
-                    ["sonar.coverage.exclusions"] = "**Test*.cs"
+                    ["sonar.coverage.exclusions"] = "**Test*.cs, **/bin/**, **/obj/**"
                 }
             };
 
