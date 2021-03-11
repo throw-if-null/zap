@@ -27,15 +27,19 @@ namespace Cake.CI.Tasks
                 {
                     ["sonar.login"] = context.Environment.GetEnvironmentVariable("SONAR_TOKEN"),
                     ["sonar.host.url"] = "https://sonarcloud.io",
+
                     ["sonar.sources"] = sourcesDirectory.Path.FullPath,
                     ["sonar.projectBaseDir"] = "..",
+
                     ["sonar.organization"] = "mimme",
                     ["sonar.projectKey"] = "MirzaMerdovic_zap",
                     ["sonar.projectName"] = "zap",
+                    ["sonar.links.issue"] = "https://github.com/MirzaMerdovic/zap/issues",
+                    ["sonar.links.scm="] = "https://github.com/MirzaMerdovic/zap",
 
                     ["sonar.inclusions"] = "**/*.cs",
                     ["sonar.cs.opencover.reportsPaths"] = "reports/*/coverage.opencover.xml",
-                    ["sonar.coverage.exclusions"] = "**Test*.cs, **/bin/**, **/obj/**"
+                    ["sonar.coverage.exclusions"] = "**Test*.cs, **bin/**, **obj/**"
                 }
             };
 
