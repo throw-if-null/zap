@@ -39,7 +39,7 @@ namespace Cake.CI.Tasks
 
                     ["sonar.inclusions"] = "**/*.cs",
                     ["sonar.cs.opencover.reportsPaths"] = "reports/*/coverage.opencover.xml",
-                    ["sonar.coverage.exclusions"] = "**Test*.cs, **/bin/**/*.*, **/obj/**/*.*"
+                    ["sonar.coverage.exclusions"] = @"**Test*.cs, **\bin\**\*.*, **\obj\**\*.*"
                 }
             };
 
