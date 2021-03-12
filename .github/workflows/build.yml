@@ -36,14 +36,26 @@ jobs:
         run: |
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
-      - name: Test, Build and analyze
+
+      - name: Sonar Begin
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
-        run: |
-          dotnet test .\src\Monitor.sln --collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml
-          dotnet build-server shutdown
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"MirzaMerdovic_zap" /o:"mimme" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="src/MongoDbMonitorTest/TestResults/*/coverage.opencover.xml" /d:sonar.coverage.exclusions="**Test*.cs"
-          dotnet build .\src\Monitor.sln          
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+        run: >
+          .\.sonar\scanner\dotnet-sonarscanner begin
+          /k:"MirzaMerdovic_zap"
+          /o:"mimme"
+          /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          /d:sonar.host.url="https://sonarcloud.io"
+          /d:sonar.cs.opencover.reportsPaths="src/MongoDbMonitorTest/TestResults/*/coverage.opencover.xml"
+          /d:sonar.coverage.exclusions="**Test*.cs"
+
+      - name: Build & Test
+        shell: powershell
+        run: dotnet test .\src\Monitor.sln --collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml
+
+      - name: Sonar End
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
+        run: .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
