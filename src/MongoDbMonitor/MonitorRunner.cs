@@ -30,7 +30,7 @@ namespace MongoDbMonitor
             _mediator = mediator;
         }
 
-        public async Task<ProcessingStatusResponse> Run(string collectionName, string operationName, IDictionary<string, object> values, CancellationToken cancellation)
+        public Task<ProcessingStatusResponse> Run(string collectionName, string operationName, IDictionary<string, object> values, CancellationToken cancellation)
         {
             if (string.IsNullOrWhiteSpace(collectionName))
                 throw new ArgumentNullException(nameof(collectionName));
@@ -45,7 +45,7 @@ namespace MongoDbMonitor
 
             var childCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
 
-            var response = await
+            var response =
                 _mediator.Send(
                     new ProcessChangeEventRequest
                     {

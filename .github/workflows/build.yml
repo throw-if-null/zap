@@ -51,8 +51,18 @@ jobs:
           /d:sonar.coverage.exclusions="**Test*.cs"
 
       - name: Build & Test
-        shell: powershell
-        run: dotnet test .\src\Monitor.sln --collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml
+        uses: zyborg/dotnet-tests-report@v1.3.0
+        with:
+          project_path: .\src\MongoDbMonitorTest
+          report_name: test_reports
+          report_title: Zap Tests
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          gist_name: zap_tests.md
+          gist_badge_label: 'Test status: %Counters_passed%/%Counters_total%'
+          gist_token: ${{ secrets.GIST_TOKEN }}
+          set_check_status_from_test_outcome: true
+        #shell: powershell
+        #run: dotnet test .\src\Monitor.sln --collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml
 
       - name: Sonar End
         env:
