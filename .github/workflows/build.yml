@@ -17,12 +17,14 @@ jobs:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
           path: ~\sonar\cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
       - name: Cache SonarCloud scanner
         id: cache-sonar-scanner
         uses: actions/cache@v1
@@ -30,6 +32,7 @@ jobs:
           path: .\.sonar\scanner
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
+
       - name: Install SonarCloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         shell: powershell
@@ -50,21 +53,38 @@ jobs:
           /d:sonar.cs.opencover.reportsPaths="src/MongoDbMonitorTest/TestResults/*/coverage.opencover.xml"
           /d:sonar.coverage.exclusions="**Test*.cs"
 
-      - name: Test
-        uses: rocklan/dotnet-tests-report@master
-        with:
-          project_path: src/MongoDbMonitorTest
-          report_name: test_reports
-          report_title: Zap Tests
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          gist_name: zap_tests.md
-          gist_badge_label: 'Test status: %Counters_passed%/%Counters_total%'
-          gist_token: ${{ secrets.GIST_TOKEN }}
-          set_check_status_from_test_outcome: true
-          fail_build_on_failed_tests: true
-          extra_test_parameters: '--collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml"'
+      - name: Set Test Title
+        run: |
+           if ${{ github.event_name == 'pull_request' }}
+           then
+             echo "title=Test Run for PR #${{steps.PRNUMBER.outputs.pr}} (${{github.run_number}})" >> $GITHUB_ENV
+             echo "file_name=TestReport.${{steps.PRNUMBER.outputs.pr}}.${{github.run_number}}.md" >> $GITHUB_ENV
+           else
+             echo "title=Test Run ${{github.run_number}}" >> $GITHUB_ENV
+             echo "file_name=TestReport.${{github.run_number}}.md" >> $GITHUB_ENV
+           fi
         #shell: powershell
         #run: dotnet test .\src\Monitor.sln --collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml
+
+      - name: Test PR
+        run: dotnet test --configuration $config --logger:"liquid.md;LogFileName=${{github.workspace}}/${{env.file_name}};Title=${{env.title}};" .\src\Monitor.sln --collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml
+
+      # upload report as build artifact
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v2
+        if: ${{always()}}
+        with:
+          name: 'Test Run'
+          path: ${{github.workspace}}/${{env.file_name}}
+
+      # add report as PR comment (if PR)
+      - name: comment PR
+        uses: machine-learning-apps/pr-comment@master
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          path: ${{env.file_name}}
 
       - name: Sonar End
         env:
