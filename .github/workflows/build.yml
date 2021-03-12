@@ -51,7 +51,7 @@ jobs:
           /d:sonar.coverage.exclusions="**Test*.cs"
 
       - name: Build & Test
-        uses: rocklan/dotnet-tests-report@v1.3.0
+        uses: rocklan/dotnet-tests-report@master
         with:
           project_path: ./src/MongoDbMonitorTest
           report_name: test_reports
