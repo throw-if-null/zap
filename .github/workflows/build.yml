@@ -53,7 +53,7 @@ jobs:
       - name: Build & Test
         uses: zyborg/dotnet-tests-report@v1.3.0
         with:
-          project_path: .\src\MongoDbMonitorTest
+          project_path: ./src/MongoDbMonitorTest
           report_name: test_reports
           report_title: Zap Tests
           github_token: ${{ secrets.GITHUB_TOKEN }}
