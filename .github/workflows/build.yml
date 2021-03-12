@@ -51,7 +51,7 @@ jobs:
           /d:sonar.coverage.exclusions="**Test*.cs"
 
       - name: Build & Test
-        uses: zyborg/dotnet-tests-report@v1.3.0
+        uses: rocklan/dotnet-tests-report@v1.3.0
         with:
           project_path: ./src/MongoDbMonitorTest
           report_name: test_reports
@@ -61,6 +61,8 @@ jobs:
           gist_badge_label: 'Test status: %Counters_passed%/%Counters_total%'
           gist_token: ${{ secrets.GIST_TOKEN }}
           set_check_status_from_test_outcome: true
+          fail_build_on_failed_tests: true
+          extra_test_parameters: '--collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml"'
         #shell: powershell
         #run: dotnet test .\src\Monitor.sln --collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml
 
