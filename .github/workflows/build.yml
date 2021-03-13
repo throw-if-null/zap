@@ -40,7 +40,7 @@ jobs:
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
 
-      - name: set pr build number
+      - name: Set PR build number
         id: PRNUMBER
         if: ${{ github.event_name == 'pull_request' }}
         uses: kkak10/pr-number-action@v1.3
@@ -71,11 +71,11 @@ jobs:
            fi
         #run: dotnet test .\src\Monitor.sln --collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml
 
-      - name: Test PR
+      - name: Test
         run: dotnet test .\src\Monitor.sln --configuration release --logger:"liquid.md;LogFileName=${{github.workspace}}\${{env.file_name}};Title=${{env.title}};" --collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml
 
       # upload report as build artifact
-      - name: Upload a Build Artifact
+      - name: Upload as build artifact
         uses: actions/upload-artifact@v2
         if: ${{always()}}
         with:
@@ -83,7 +83,7 @@ jobs:
           path: ${{github.workspace}}/${{env.file_name}}
 
       # add report as PR comment (if PR)
-      - name: comment PR
+      - name: Comment on PR
         uses: machine-learning-apps/pr-comment@master
         if: ${{ github.event_name == 'pull_request' }}
         env:
