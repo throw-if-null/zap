@@ -72,7 +72,7 @@ jobs:
         #run: dotnet test .\src\Monitor.sln --collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml
 
       - name: Test PR
-        run: dotnet test .\src\Monitor.sln --configuration $config --logger:"liquid.md;LogFileName=${{github.workspace}}\${{env.file_name}};Title=${{env.title}};" --collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml
+        run: dotnet test .\src\Monitor.sln --configuration release --logger:"liquid.md;LogFileName=${{github.workspace}}\${{env.file_name}};Title=${{env.title}};" --collect:"XPlat Code Coverage" --settings .\src\MongoDbMonitorTest\runsettings.xml
 
       # upload report as build artifact
       - name: Upload a Build Artifact
