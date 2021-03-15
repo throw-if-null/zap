@@ -35,20 +35,15 @@ jobs:
 
       - name: Install SonarCloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        shell: powershell
+        shell: pwsh
         run: |
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
 
-      - name: Set PR build number
-        id: PRNUMBER
-        if: ${{ github.event_name == 'pull_request' }}
-        uses: kkak10/pr-number-action@v1.3
-
       - name: Sonar Begin
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        shell: powershell
+        shell: pwsh
         run: >
           .\.sonar\scanner\dotnet-sonarscanner begin
           /k:"MirzaMerdovic_zap"
