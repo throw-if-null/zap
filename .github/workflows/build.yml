@@ -21,7 +21,7 @@ jobs:
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
-          path: ~/sonar\cache
+          path: ~/sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
@@ -29,7 +29,7 @@ jobs:
         id: cache-sonar-scanner
         uses: actions/cache@v1
         with:
-          path: ./.sonar\scanner
+          path: ./.sonar/scanner
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
 
@@ -37,8 +37,8 @@ jobs:
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         shell: pwsh
         run: |
-          New-Item -Path ./.sonar\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path ./.sonar\scanner
+          New-Item -Path /.sonar/scanner -ItemType Directory
+          dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
 
       - name: Set PR build number
         id: PRNUMBER
@@ -71,7 +71,13 @@ jobs:
            fi
 
       - name: Test
-        run: dotnet test ./src/Monitor.sln --configuration release --logger:"liquid.md;LogFileName=${{github.workspace}}\${{env.file_name}};Title=${{env.title}};" --collect:"XPlat Code Coverage" --settings ./src/MongoDbMonitorTest/runsettings.xml
+        shell: pwsh
+        run: >
+          dotnet test ./src/Monitor.sln 
+          --configuration release 
+          --logger:"liquid.md;LogFileName=${{github.workspace}}\${{env.file_name}};Title=${{env.title}};" 
+          --collect:"XPlat Code Coverage" 
+          --settings ./src/MongoDbMonitorTest/runsettings.xml
 
       # upload report as build artifact
       - name: Upload as build artifact
