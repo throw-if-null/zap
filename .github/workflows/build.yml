@@ -1,10 +1,7 @@
 name: Build
-on:
-  push:
-    branches:
-      - branch-zero
-  pull_request:
-    types: [opened, synchronize, reopened]
+
+on: [push, pull_request]
+
 jobs:
   build:
     name: Build
@@ -40,7 +37,7 @@ jobs:
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
 
-      - name: Sonar Begin
+      - name: Sonar Start
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: pwsh
@@ -56,7 +53,7 @@ jobs:
       - name: Test
         uses: rocklan/dotnet-tests-report@master
         with:
-          project_path: .\src\Monitor.sln
+          project_path: .\src\zap.sln
           report_name: zap_test_report
           report_title: Zap Tests Report
           github_token: ${{ secrets.GITHUB_TOKEN }}
