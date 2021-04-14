@@ -57,7 +57,7 @@ jobs:
           report_name: zap_test_report
           report_title: Zap Tests Report
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          gist_name: contoso_business_tests.md
+          gist_name: zap_tests.md
           gist_badge_label: 'Test passed: %Counters_passed%/%Counters_total%'
           gist_token: ${{ secrets.GIST_TOKEN }}
           set_check_status_from_test_outcome: true
