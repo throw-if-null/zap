@@ -21,14 +21,14 @@ namespace MongoDbTrigger
                 .AddOptions<MongoDbTriggerOptions>()
                 .Configure<IConfiguration>((settings, configuration) =>
                 {
-                    settings.ConnectionString = configuration.GetSection("AzureFunctionsJobHost:MongoOptions:ConnectionString").Get<string>();
-                    settings.Database = configuration.GetSection("AzureFunctionsJobHost:MongoOptions:Database").Get<string>();
+                    settings.ConnectionString = configuration.GetSection("AzureFunctionsJobHost:MonitorOptions:ConnectionString").Get<string>();
+                    settings.Database = configuration.GetSection("AzureFunctionsJobHost:MonitorOptions:Database").Get<string>();
 
                     int index = 0;
 
                     while(true)
                     {
-                        var collectionName = configuration.GetSection("AzureFunctionsJobHost:MongoOptions:CollectionOptions").GetSection($"{index}:Name").Get<string>();
+                        var collectionName = configuration.GetSection("AzureFunctionsJobHost:MonitorOptions:CollectionOptions").GetSection($"{index}:Name").Get<string>();
 
                         if (string.IsNullOrWhiteSpace(collectionName))
                             break;

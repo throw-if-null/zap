@@ -17,7 +17,8 @@ namespace MongoDbMonitorTest
 {
     public class PipelineTestsWithMockedHttpClients
     {
-        private static readonly Lazy<IServiceCollection> Services = new Lazy<IServiceCollection>(() => TestServiceFactory.RegisterServices(true, true), true);
+        private static readonly Lazy<IServiceCollection> Services =
+            new Lazy<IServiceCollection>(() => TestServiceFactory.RegisterServices(true, @"WithMockedHttpClients/test.json"), true);
 
         [Theory]
         [InlineData("items", "_id", nameof(ProcessItemRequest))]

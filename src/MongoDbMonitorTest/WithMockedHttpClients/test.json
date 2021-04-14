@@ -58,6 +58,19 @@
     "SlackApiClientOptions": {
       "TimeoutInSeconds": 5,
       "ChannelWebhookUrl": "https://hooks.slack.com/services/xxx"
-    }
+    },
+
+    "HttpRequestInterceptorOptions": [
+      {
+        "MethodName": "POST",
+        "Path": "/services/xxx",
+        "ResponseStatusCode": 200
+      },
+      {
+        "MethodName": "POST",
+        "Path": "/webhooks/clear-cache",
+        "ResponseStatusCode": 200
+      }
+    ]
   }
 }

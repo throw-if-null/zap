@@ -20,6 +20,7 @@ using MongoDbMonitor.Commands.SendNotification;
 using MongoDbMonitor.Commands.SendSlackAlert;
 using MongoDbMonitor.CrossCutting.QoS;
 using MongoDbTrigger;
+using Scissors;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -28,32 +29,26 @@ namespace MongoDbMonitor
 {
     public static class WebJobExtensions
     {
+        private const string ConfigurationBasePath = "AzureFunctionsJobHost:MonitorOptions";
+
         public static IWebJobsBuilder AddMongoDbCollectionMonitor(this IWebJobsBuilder builder)
         {
             _ = builder ?? throw new ArgumentNullException(nameof(builder));
 
-            RegisterOptions<Collection<CollectionOptions>>(
-                builder.Services,
-                "AzureFunctionsJobHost:MonitorOptions:CollectionOptions");
-
-            RegisterOptions<RetryProviderOptions>(
-                builder.Services,
-                "AzureFunctionsJobHost:MonitorOptions:RetryProviderOptions");
-
-            RegisterOptions<HttpApiClientOptions>(
-                builder.Services,
-                "AzureFunctionsJobHost:MonitorOptions:HttpApiClientOptions");
-
-            RegisterOptions<SlackApiClientOptions>(
-                builder.Services,
-                "AzureFunctionsJobHost:MonitorOptions:SlackApiClientOptions");
+            RegisterOptions<Collection<CollectionOptions>>(builder.Services, $"{ConfigurationBasePath}:{nameof(CollectionOptions)}");
+            RegisterOptions<RetryProviderOptions>(builder.Services, $"{ConfigurationBasePath}:{nameof(RetryProviderOptions)}");
+            RegisterOptions<HttpApiClientOptions>(builder.Services, $"{ConfigurationBasePath}:{nameof(HttpApiClientOptions)}");
+            RegisterOptions<SlackApiClientOptions>(builder.Services, $"{ConfigurationBasePath}:{nameof(SlackApiClientOptions)}");
+            RegisterOptions<Collection<HttpRequestInterceptorOptions>>(builder.Services, $"{ConfigurationBasePath}:{nameof(HttpRequestInterceptorOptions)}");
 
             builder.Services.AddLogging(x => x.AddConsole());
 
             builder.Services.AddMemoryCache();
 
-            builder.Services.AddHttpClient<IHttpApiClient, HttpApiClient>();
-            builder.Services.AddHttpClient<ISlackApiClient, SlackApiClient>();
+            builder.Services.AddTransient<HttpRequestInterceptor>();
+
+            builder.Services.AddHttpClient<IHttpApiClient, HttpApiClient>().AddHttpMessageHandler<HttpRequestInterceptor>();
+            builder.Services.AddHttpClient<ISlackApiClient, SlackApiClient>().AddHttpMessageHandler<HttpRequestInterceptor>();
 
             builder.Services.AddSingleton<IRetryProvider, RetryProvider>();
 
@@ -68,8 +63,8 @@ namespace MongoDbMonitor
 
             builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(MetricsCapturingPipelineBehavior<,>));
             RegisterMediatorBehaviors(builder.Services);
-            RegisterMediatorExceptionHandlers(builder.Services);
 
+            RegisterMediatorExceptionHandlers(builder.Services);
 
             builder.AddMongoDbTrigger();
 

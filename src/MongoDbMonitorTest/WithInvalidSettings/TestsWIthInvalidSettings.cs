@@ -12,7 +12,8 @@ namespace MongoDbMonitorTest
 {
     public class TestsWIthInvalidSettings
     {
-        private static readonly Lazy<IServiceCollection> Services = new Lazy<IServiceCollection>(() => TestServiceFactory.RegisterServices(true, true, "test-with-no-collections.json"), true);
+        private static readonly Lazy<IServiceCollection> Services =
+            new Lazy<IServiceCollection>(() => TestServiceFactory.RegisterServices(true, @"WithInvalidSettings/test.json"), true);
 
         [Fact]
         public async Task Should_Return_Unknown_ProcessingStep_When_Cancelled()

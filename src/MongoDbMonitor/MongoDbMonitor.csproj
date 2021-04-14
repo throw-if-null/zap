@@ -1,17 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="MediatR" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="3.1.12" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="3.1.12" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.12" />
-    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="3.1.12" />
-    <PackageReference Include="Polly" Version="7.2.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="3.1.14" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="3.1.14" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.14" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.14" />
+    <PackageReference Include="Polly" Version="7.2.2" />
+    <PackageReference Include="Scissors" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
