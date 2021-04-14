@@ -47,7 +47,7 @@ jobs:
           /o:"mimme"
           /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
           /d:sonar.host.url="https://sonarcloud.io"
-          /d:sonar.cs.opencover.reportsPaths=".\src\MongoDbMonitorTest\TestResults\*\coverage.opencover.xml"
+          /d:sonar.cs.opencover.reportsPaths=".\_TMP\*\coverage.opencover.xml"
           /d:sonar.coverage.exclusions="**Test*.cs"
 
       - name: Test
