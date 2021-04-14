@@ -51,7 +51,7 @@ jobs:
           /d:sonar.coverage.exclusions="**Test*.cs"
 
       - name: Test
-        uses: rocklan/dotnet-tests-report@master
+        uses: zyborg/dotnet-tests-report@v1.4.0
         with:
           project_path: .\src\zap.sln
           report_name: zap_test_report
