@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MongoDbMonitor.Commands.Exceptions;
 using MongoDbMonitor.Commands.ExtractDocumentIdentifier;
 
@@ -11,8 +12,9 @@ namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.ExtractDocumentIdenti
     {
         public InvalidObjectIdExceptionHandler(
             IMediator mediator,
+            IOptions<ExceptionHandlerOptions> options,
             ILogger<InvalidObjectIdExceptionHandler<TRequest>> logger) :
-            base(mediator, logger)
+            base(mediator, options, logger)
         {
         }
     }

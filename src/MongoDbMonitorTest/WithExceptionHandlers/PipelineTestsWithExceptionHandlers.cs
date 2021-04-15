@@ -13,7 +13,7 @@ namespace MongoDbMonitorTest
     public class PipelineTestsWithExceptionHandlers
     {
         private static readonly Lazy<IServiceCollection> Services =
-            new Lazy<IServiceCollection>(() => TestServiceFactory.RegisterServices(true, @"WithExceptionHandlers/test.json"), true);
+            new Lazy<IServiceCollection>(() => TestServiceFactory.RegisterServices(@"WithExceptionHandlers/test.json"), true);
 
         [Theory]
         [InlineData("items", "_id")]

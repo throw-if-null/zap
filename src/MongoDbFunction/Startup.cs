@@ -4,6 +4,7 @@ using Microsoft.Azure.WebJobs.Hosting;
 using MongoDbFunction.Commands.ProcessItem;
 using MongoDbFunction.Commands.ProcessThing;
 using MongoDbMonitor;
+using MongoDbTrigger;
 
 [assembly: FunctionsStartup(typeof(MongoDbFunction.Startup))]
 namespace MongoDbFunction
@@ -12,10 +13,11 @@ namespace MongoDbFunction
     {
         public void Configure(IWebJobsBuilder builder)
         {
-            builder.RegisterProcessDocumentMediatorHandler<ProcessItemRequest, ProcessItemHandler>();
-            builder.RegisterProcessDocumentMediatorHandler<ProcessThingRequest, ProcessThingHandler>();
+            builder.Services.RegisterProcessDocumentMediatorHandler<ProcessItemRequest, ProcessItemHandler>();
+            builder.Services.RegisterProcessDocumentMediatorHandler<ProcessThingRequest, ProcessThingHandler>();
 
-            builder.AddMongoDbCollectionMonitor();
+            builder.Services.AddMongoDbCollectionMonitor();
+            builder.AddMongoDbTrigger();
         }
     }
 }

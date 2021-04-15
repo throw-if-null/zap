@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MongoDbMonitor.Commands.Exceptions;
 
 namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.ResolveCollectionType
@@ -9,8 +10,9 @@ namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.ResolveCollectionType
     {
         public InvalidRequestTypeExceptionHandler(
             IMediator mediator,
+            IOptions<ExceptionHandlerOptions> options,
             ILogger<InvalidRequestTypeExceptionHandler> logger) :
-            base(mediator, logger)
+            base(mediator, options, logger)
         {
         }
     }

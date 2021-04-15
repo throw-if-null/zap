@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MongoDbMonitor.Commands.Common.Responses;
 using MongoDbMonitor.Commands.Exceptions;
 using MongoDbMonitor.Commands.SendNotification;
@@ -15,13 +16,16 @@ namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.SendNotification
         IRequestExceptionHandler<SendNotificationRequest, ProcessingStatusResponse, SendNotificationFailedException>
     {
         private readonly IMediator _mediator;
+        private readonly ExceptionHandlerOptions _options;
         private readonly ILogger _logger;
 
         public SendNotificationFailedExceptionHandler(
             IMediator mediator,
+            IOptions<ExceptionHandlerOptions> options,
             ILogger<SendNotificationFailedExceptionHandler> logger)
         {
             _mediator = mediator;
+            _options = options.Value;
             _logger = logger;
         }
 
@@ -34,6 +38,9 @@ namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.SendNotification
             _logger.LogError(
                 exception,
                 $"Sending notification failed for collection: {request.CollectionName} and Id: {request.Id}");
+
+            if (_options.Disabled)
+                throw exception;
 
             var response =
                 await

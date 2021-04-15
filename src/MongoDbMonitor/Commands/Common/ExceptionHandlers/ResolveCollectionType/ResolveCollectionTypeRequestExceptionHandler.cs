@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using MediatR.Pipeline;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MongoDbMonitor.Commands.Common.Responses;
 using MongoDbMonitor.Commands.ResolveCollectionType;
 using MongoDbMonitor.Commands.SendSlackAlert;
@@ -16,13 +17,16 @@ namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.ResolveCollectionType
         where TException : Exception
     {
         private readonly IMediator _mediator;
+        private readonly ExceptionHandlerOptions _options;
         private readonly ILogger _logger;
 
         protected ResolveCollectionTypeRequestExceptionHandler(
             IMediator mediator,
+            IOptions<ExceptionHandlerOptions> options,
             ILogger<ResolveCollectionTypeRequestExceptionHandler<TException>> logger)
         {
             _mediator = mediator;
+            _options = options.Value;
             _logger = logger;
         }
 
@@ -33,6 +37,9 @@ namespace MongoDbMonitor.Commands.Common.ExceptionHandlers.ResolveCollectionType
             CancellationToken cancellationToken)
         {
             _logger.LogError(exception, exception.Message);
+
+            if (_options.Disabled)
+                throw exception;
 
             var response =
                 await
