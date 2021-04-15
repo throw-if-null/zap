@@ -39,11 +39,11 @@ jobs:
 
       - name: Restore projects
         shell: pwsh
-        run: dotnet restore -s https://api.nuget.org/v3/index.json -f
+        run: dotnet restore .\src\zap.sln -s https://api.nuget.org/v3/index.json -f
 
       - name: Build projects
         shell: pwsh
-        run: dotnet build -c Release --no-restore
+        run: dotnet build .\src\zap.sln -c Release --no-restore
 
       - name: Sonar Start
         env:
