@@ -37,6 +37,14 @@ jobs:
           New-Item -Path .\.sonar\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
 
+      - name: Restore projects
+        shell: pwsh
+        run: dotnet restore -s https://api.nuget.org/v3/index.json -f
+
+      - name: Build projects
+        shell: pwsh
+        run: dotnet build -c Release --no-restore
+
       - name: Sonar Start
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -53,6 +61,7 @@ jobs:
       - name: Test
         uses: zyborg/dotnet-tests-report@v1.4.0
         with:
+          no_restore: true
           project_path: .\src\zap.sln
           report_name: zap_test_report
           report_title: Zap Tests Report
